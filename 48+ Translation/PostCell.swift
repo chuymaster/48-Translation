@@ -1,5 +1,5 @@
 //
-//  MemberCell.swift
+//  PostCell.swift
 //  48+ Translation
 //
 //  Created by CHATCHAI LOKNIYOM on 3/25/16.
@@ -8,10 +8,10 @@
 
 import UIKit
 
-class MemberCell: UITableViewCell{
+class PostCell: UITableViewCell{
     @IBOutlet weak var titleLabel: UILabel!
-    @IBOutlet weak var descriptionTextView: UITextView!
-    @IBOutlet weak var memberImage: UIImageView!
+    @IBOutlet weak var descriptionLabel: UILabel!
+    @IBOutlet weak var postImage: UIImageView!
     
     var taskToCancelifCellIsReused: NSURLSessionTask? {
         didSet {

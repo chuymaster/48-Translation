@@ -32,25 +32,25 @@ class APIBaseClient : NSObject{
         for (key, value) in headers{
             request.addValue(value as! String, forHTTPHeaderField: key)
         }
-        //print("Request:\(request)")
+        print("Request URL: \(request.URL!.absoluteString)")
         
         let task = sharedSession.dataTaskWithRequest(request) { (data, response, error) in
             
             guard (error == nil) else{
-                let errorString = "There was an error with your request: \(error)"
-                self.sendErrorWithCompletionHandler(domain, code: -1, request: request, errorString: errorString, completionHandler: completionHandler)
+                let errorString = Message.Error.ER001.message
+                self.sendErrorWithCompletionHandler(domain, code: Message.Error.ER001.code, request: request, errorString: errorString, completionHandler: completionHandler)
                 return
             }
             
             guard let statusCode = (response as? NSHTTPURLResponse)?.statusCode where statusCode >= 200 && statusCode <= 299 else{
-                let errorString = "Your request returned a status code other than 2xx (\((response as? NSHTTPURLResponse)!.statusCode))"
-                self.sendErrorWithCompletionHandler(domain, code: -2, request: request, errorString: errorString, completionHandler: completionHandler)
+                let errorString = Message.Error.ER002.message + " \((response as? NSHTTPURLResponse)!.statusCode)"
+                self.sendErrorWithCompletionHandler(domain, code: Message.Error.ER002.code, request: request, errorString: errorString, completionHandler: completionHandler)
                 return
             }
             
             guard let data = data else{
-                let errorString = ("No data was returned by the request!")
-                self.sendErrorWithCompletionHandler(domain, code: -3, request: request, errorString: errorString, completionHandler: completionHandler)
+                let errorString = Message.Error.ER003.message
+                self.sendErrorWithCompletionHandler(domain, code: Message.Error.ER003.code, request: request, errorString: errorString, completionHandler: completionHandler)
                 return
             }
             
@@ -73,11 +73,11 @@ class APIBaseClient : NSObject{
         let task = sharedSession.dataTaskWithRequest(request) {data, response, error in
             
             guard (error == nil) else{
-                let errorString = "There was an when downloading photos"
+                let errorString = Message.Error.ER004.message
                 let userInfo = ["request": (request.URL?.absoluteString)!,
                                 "HTTP method": request.HTTPMethod!,
                                 NSLocalizedDescriptionKey: errorString]
-                let formattedError = NSError(domain: domain, code: -10, userInfo: userInfo)
+                let formattedError = NSError(domain: domain, code: Message.Error.ER004.code, userInfo: userInfo)
                 completionHandler(imageData: nil, error: formattedError)
                 return
             }
@@ -120,8 +120,8 @@ class APIBaseClient : NSObject{
         do {
             parsedResult = try NSJSONSerialization.JSONObjectWithData(data, options: .AllowFragments)
         } catch {
-            let userInfo = [NSLocalizedDescriptionKey : "Could not parse the data as JSON: '\(data)'"]
-            completionHandler(result: nil, error: NSError(domain: domain, code: -99, userInfo: userInfo))
+            let userInfo = [NSLocalizedDescriptionKey : Message.Error.ER005.message]
+            completionHandler(result: nil, error: NSError(domain: domain, code: Message.Error.ER005.code , userInfo: userInfo))
         }
         completionHandler(result: parsedResult, error: nil)
     }

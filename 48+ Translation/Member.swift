@@ -40,4 +40,7 @@ class Member: NSManagedObject{
         favoriteFlag = false
     }
     
+    var displayName: String {
+        return "\(familyName)\(givenName)"
+    }
 }

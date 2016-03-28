@@ -14,6 +14,33 @@ class GooglePlusAPIClient : NSObject{
     
     let api = APIBaseClient.sharedInstance()
     
+    // Get member profiles and save to the CoreDataStackManager
+    func getMemberList(){
+        // TODO: Use GDC to dispatch request serially
+        for id in Constants.Database.MemberUserIdList{
+            var _requestFinished = false
+            getMember(id){ (result, errorString) in
+                _requestFinished = true
+                if result == true{
+                    print("ID: \(id) Request result: \(result)")
+                    
+                    // If it is the last member's request, save context
+                    if id == Constants.Database.MemberUserIdList[Constants.Database.MemberUserIdList.count - 1] {
+                        Utilities.performUIUpdatesOnMain(){
+                            CoreDataStackManager.sharedInstance().saveContext()
+                        }
+                    }
+                }else{
+                    print(errorString)
+                }
+            }
+            
+            while _requestFinished == false {
+                continue
+            }
+        }
+    }
+    
     // Get Member Profile
     func getMember(id: String, completionHandler:(result: Bool, errorString: String?) -> Void){
         
@@ -31,35 +58,41 @@ class GooglePlusAPIClient : NSObject{
                 completeWithError(error)
                 return
             }else{
+                print("ID: \(id) JSON Result: \(result)")
                 // Guard against retrieved data
                 guard let
                     id = result[Constants.GooglePlusApi.PeopleAPI.ResponseKeys.Id] as? String,
                     name = result[Constants.GooglePlusApi.PeopleAPI.ResponseKeys.Name] as? [String: AnyObject],
                     familyName = name[Constants.GooglePlusApi.PeopleAPI.ResponseKeys.FamilyName] as? String,
                     givenName = name[Constants.GooglePlusApi.PeopleAPI.ResponseKeys.GivenName] as? String,
-                    tagLine = result[Constants.GooglePlusApi.PeopleAPI.ResponseKeys.TagLine] as? String,
                     memberUrl = result[Constants.GooglePlusApi.PeopleAPI.ResponseKeys.Url] as? String,
                     image = result[Constants.GooglePlusApi.PeopleAPI.ResponseKeys.Image] as? [String: AnyObject],
-                    imageUrl = image[Constants.GooglePlusApi.PeopleAPI.ResponseKeys.Url] as? String else{
-                        completeWithError("Response has error")
+                    imageUrl = image[Constants.GooglePlusApi.PeopleAPI.ResponseKeys.Url] as? String else{                     completeWithError(Message.Error.ER006.message)
                         return
                 }
                 
                 // Create new member
-                let dictionary: [String: AnyObject] = [
+                var dictionary: [String: AnyObject] = [
                     Constants.GooglePlusApi.PeopleAPI.ResponseKeys.Id: id,
                     Constants.GooglePlusApi.PeopleAPI.ResponseKeys.FamilyName: familyName,
                     Constants.GooglePlusApi.PeopleAPI.ResponseKeys.GivenName: givenName,
-                    Constants.GooglePlusApi.PeopleAPI.ResponseKeys.TagLine: tagLine,
+                    Constants.GooglePlusApi.PeopleAPI.ResponseKeys.TagLine: "",
                     Constants.GooglePlusApi.PeopleAPI.ResponseKeys.Url: memberUrl,
-                    "imageUrl": imageUrl
+                    "imageUrl": Utilities.stripQueryFromUrl(imageUrl)
                     ]
                 
-                let member = Member(dictionary: dictionary, context: Utilities.sharedContext)
-                print(member)
+                // Only some members have tag line
+                if let tagLine = result[Constants.GooglePlusApi.PeopleAPI.ResponseKeys.TagLine] as? String{
+                    dictionary[Constants.GooglePlusApi.PeopleAPI.ResponseKeys.TagLine] = tagLine
+                }
                 
+                let _ = Member(dictionary: dictionary, context: Utilities.sharedContext)
+                //print(member)
+                
+                completionHandler(result: true, errorString: nil)
+
                 // Get post form the member
-                self.getPost(member, completionHandler: completionHandler)
+                //self.getPost(member, completionHandler: completionHandler)
             }
         }
     }
@@ -82,8 +115,7 @@ class GooglePlusAPIClient : NSObject{
                 return
             }else{
                 // Get post items
-                guard let items = result[Constants.GooglePlusApi.ActivitiesAPI.ResponseKeys.Items] as? [[String: AnyObject]] else{
-                    completeWithError("Response has error")
+                guard let items = result[Constants.GooglePlusApi.ActivitiesAPI.ResponseKeys.Items] as? [[String: AnyObject]] else{                 completeWithError(Message.Error.ER006.message)
                     return
                 }
                 
@@ -97,17 +129,21 @@ class GooglePlusAPIClient : NSObject{
                         publishedAt = item[Constants.GooglePlusApi.ActivitiesAPI.ResponseKeys.Published] as? String,
                         updatedAt = item[Constants.GooglePlusApi.ActivitiesAPI.ResponseKeys.Updated] as? String {
                     
+                        // Convert string to NSDate
                         let dateFormatter = NSDateFormatter()
                         dateFormatter.dateFormat = Constants.General.DateFormat
                     
                         let published = dateFormatter.dateFromString(publishedAt)!
                         let updated = dateFormatter.dateFromString(updatedAt)!
+                        
+                        // Replace <br /> in content with \n
+                        let formattedContent = content.stringByReplacingOccurrencesOfString("<br />", withString: "\n")
                     
                         // Create new post
                         let postDictionary: [String: AnyObject] = [
                             Constants.GooglePlusApi.ActivitiesAPI.ResponseKeys.Id: id,
                             Constants.GooglePlusApi.ActivitiesAPI.ResponseKeys.Title: title,
-                            Constants.GooglePlusApi.ActivitiesAPI.ResponseKeys.Content: content,
+                            Constants.GooglePlusApi.ActivitiesAPI.ResponseKeys.Content: formattedContent,
                             Constants.GooglePlusApi.ActivitiesAPI.ResponseKeys.Url: url,
                             Constants.GooglePlusApi.ActivitiesAPI.ResponseKeys.Published: published,
                             Constants.GooglePlusApi.ActivitiesAPI.ResponseKeys.Updated: updated
@@ -123,7 +159,7 @@ class GooglePlusAPIClient : NSObject{
                             self.getPhoto(post, attachment: attachment)
 
                         }
-                        print(post)
+                        //print(post)
                     }
                 }
                 completionHandler(result: true, errorString: nil)
@@ -157,7 +193,7 @@ class GooglePlusAPIClient : NSObject{
                                 
                                 let photo = Photo(dictionary: photoDictionary, context: Utilities.sharedContext)
                                 photo.post = post
-                                print(photo)
+                                //print(photo)
                             }
                         }
                         _counter += 1
@@ -179,7 +215,7 @@ class GooglePlusAPIClient : NSObject{
                         
                         let photo = Photo(dictionary: photoDictionary, context: Utilities.sharedContext)
                         photo.post = post
-                        print(photo)
+                        //print(photo)
                     }
                 }
             // Video
@@ -198,7 +234,7 @@ class GooglePlusAPIClient : NSObject{
                         
                         let photo = Photo(dictionary: photoDictionary, context: Utilities.sharedContext)
                         photo.post = post
-                        print(photo)
+                        //print(photo)
                     }
                 }
             default:

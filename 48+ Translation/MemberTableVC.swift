@@ -11,36 +11,15 @@ import CoreData
 
 class MemberTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
     
+    // MARK: Class Variables
     var members: [Member] = [Member]()
-    
-    override func viewDidLoad() {
-        
-        fetchedResultsController.delegate = self
-        
-        do{
-            // Fetch members from database and add to the map
-            try self.fetchedResultsController.performFetch()
-            members = self.fetchedResultsController.fetchedObjects as! [Member]
-            print("Member Count:\(members.count)")
-        }catch{}
-        
-        if members.count == 0{
-            getPeople()
-        }else{
-            print(members)
-        }
-    }
-    
-    override func viewWillAppear(animated: Bool) {
-        super.viewWillAppear(animated)
-
-    }
-    
+    @IBOutlet var memberTableView: UITableView!
+    var api: GooglePlusAPIClient!
     
     // NSFetchedResultsController for Member entity
     lazy var fetchedResultsController: NSFetchedResultsController = {
         let fetchRequest = NSFetchRequest(entityName: "Member")
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "id", ascending: false)]
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "familyName", ascending: true)]
         let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,
                                                                   managedObjectContext: Utilities.sharedContext,
                                                                   sectionNameKeyPath: nil,
@@ -48,25 +27,45 @@ class MemberTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
         return fetchedResultsController
     }()
     
-    func getPeople(){
-        let api = GooglePlusAPIClient()
-        for id in Constants.Database.MemberUserIdList{
-            api.getMember(id){ (result, errorString) in
-                print("\(id) request result: \(result)")
-                
-                Utilities.performUIUpdatesOnMain(){
-                    CoreDataStackManager.sharedInstance().saveContext()
-                }
-            }
+    // MARK: View Controller Events
+    override func viewDidLoad() {
+        
+        fetchedResultsController.delegate = self
+        api = GooglePlusAPIClient()
+        
+        // Fetch members from database
+        do{
+            try fetchedResultsController.performFetch()
+            members = fetchedResultsController.fetchedObjects as! [Member]
+        }catch{
+        }
+        
+        // If no member in database, load new data
+        if members.isEmpty{
+            api.getMemberList()
+        }else{
+            print("Member count: \(members.count)")
         }
     }
     
-    // MARK: - Table View
-    
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        return 1
+    // Remove and refresh all items
+    @IBAction func refreshAction(sender: AnyObject) {
+        do{
+            try fetchedResultsController.performFetch()
+            members = fetchedResultsController.fetchedObjects as! [Member]
+            for member in members{
+                Utilities.sharedContext.deleteObject(member)
+            }
+            Utilities.performUIUpdatesOnMain(){
+                CoreDataStackManager.sharedInstance().saveContext()
+            }
+        }catch{
+        }
+        api.getMemberList()
     }
-    // Use sectionInfo from NSResultsController instead
+    
+    // MARK: - Table View Delegate
+    
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         let sectionInfo = self.fetchedResultsController.sections![section]
         return sectionInfo.numberOfObjects
@@ -74,38 +73,45 @@ class MemberTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cellID = "MemberCell"
-        let cell = tableView.dequeueReusableCellWithIdentifier(cellID, forIndexPath: indexPath)
+        let cell = tableView.dequeueReusableCellWithIdentifier(cellID, forIndexPath: indexPath) as! MemberCell
         
         let member = fetchedResultsController.objectAtIndexPath(indexPath) as! Member
         
-        cell.textLabel?.text = "\(member.familyName)\(member.givenName)"
-        cell.detailTextLabel?.text = member.tagLine
-        APIBaseClient.sharedInstance().taskForImage(member.imageUrl){ (imageData, error) in
-            if error == nil{
+        cell.accessoryType = .DisclosureIndicator
+        cell.titleLabel.text = member.displayName
+        cell.descriptionTextView.text = member.tagLine
+        // Scroll textview to the top
+        cell.descriptionTextView.scrollRangeToVisible(NSMakeRange(0, 0))
+        cell.memberImage.contentMode = .ScaleAspectFill
+        
+        let task = APIBaseClient.sharedInstance().taskForImage(member.imageUrl){ (imageData, error) in
+            if let data = imageData{
                 Utilities.performUIUpdatesOnMain(){
-                    let image = UIImage(data: imageData!)
-                    cell.imageView?.image = image
+                    let image = UIImage(data: data)
+                    cell.memberImage.image = image
                 }
             }
         }
+        cell.taskToCancelifCellIsReused = task
         return cell
     }
     
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        let selectedMember = fetchedResultsController.objectAtIndexPath(indexPath) as! Member
-        
-        let vc = self.storyboard!.instantiateViewControllerWithIdentifier("PostList") as! PostTableVC
-        vc.posts = selectedMember.posts
-        self.navigationController?.pushViewController(vc, animated: true)
+    // Disable Delete operation
+    override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+        return false
     }
     
-    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-//        if editingStyle == .Delete {
-//            // Remove the Pin from Core Data
-//            let member = fetchedResultsController.objectAtIndexPath(indexPath) as! Member
-//            Utilities.sharedContext.deleteObject(member)
-//            CoreDataStackManager.sharedInstance().saveContext()
-//        }
+    // MARK: Segue
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        // Use segue to move to post list view controller
+        if (segue.identifier == "PostsSegue") {
+            let vc = segue.destinationViewController as! PostTableVC
+            let cell = sender as! UITableViewCell
+            let indexPath = memberTableView.indexPathForCell(cell)
+            let member = fetchedResultsController.objectAtIndexPath(indexPath!) as! Member
+            vc.member = member
+        }
     }
     
     // MARK: - NSFetchedResultsControllerDelegate
@@ -129,21 +135,10 @@ class MemberTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
         switch type {
         case .Insert:
             tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: .Fade)
-            
         case .Delete:
             tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: .Fade)
-            
-        case .Update:
-            let cell = tableView.cellForRowAtIndexPath(indexPath!) as UITableViewCell!
-            
-            let member = fetchedResultsController.objectAtIndexPath(indexPath!) as! Member
-            
-            cell.textLabel?.text = "\(member.familyName)\(member.givenName)"
-            cell.detailTextLabel?.text = member.tagLine
-            
-        case .Move:
-            tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: .Fade)
-            tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: .Fade)
+        default:
+            break
         }
     }
     

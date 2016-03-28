@@ -14,6 +14,7 @@ class Post: NSManagedObject{
     @NSManaged var id: String
     @NSManaged var title: String
     @NSManaged var content: String
+    @NSManaged var translatedContent: String
     @NSManaged var url: String
     @NSManaged var publishedAt: NSDate
     @NSManaged var updatedAt: NSDate
@@ -40,5 +41,44 @@ class Post: NSManagedObject{
         updatedAt = dictionary[Constants.GooglePlusApi.ActivitiesAPI.ResponseKeys.Updated] as! NSDate
         favoriteFlag = false
     }
+ 
+    var publishedAtString: String{
+        // Format date
+        let dateFormatter = NSDateFormatter()
+        dateFormatter.dateStyle = .MediumStyle
+        dateFormatter.timeStyle = .MediumStyle
+        let dateString = dateFormatter.stringFromDate(publishedAt)
+        
+        return dateString
+    }
     
+    var publishedAtDateString: String{
+        // Format date
+        let dateFormatter = NSDateFormatter()
+        dateFormatter.dateStyle = .MediumStyle
+        dateFormatter.timeStyle = .NoStyle
+        let dateString = dateFormatter.stringFromDate(publishedAt)
+        
+        return dateString
+    }
+    
+    var updatedAtString: String{
+        // Format date
+        let dateFormatter = NSDateFormatter()
+        dateFormatter.dateStyle = .MediumStyle
+        dateFormatter.timeStyle = .MediumStyle
+        let dateString = dateFormatter.stringFromDate(updatedAt)
+        
+        return dateString
+    }
+    
+    var updatedAtDateString: String{
+        // Format date
+        let dateFormatter = NSDateFormatter()
+        dateFormatter.dateStyle = .MediumStyle
+        dateFormatter.timeStyle = .NoStyle
+        let dateString = dateFormatter.stringFromDate(updatedAt)
+        
+        return dateString
+    }
 }

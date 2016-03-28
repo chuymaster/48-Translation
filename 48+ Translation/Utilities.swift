@@ -55,5 +55,41 @@ class Utilities{
             return thumbUrl
         }
     }
-
+    
+    // Remove query from the url
+    // From - https://lh3.googleusercontent.com/-dNvFgkld1WE/AAAAAAAAAAI/AAAAAAAAABE/zzg10zkwrvw/photo.jpg?sz=50
+    // To - https://lh3.googleusercontent.com/-dNvFgkld1WE/AAAAAAAAAAI/AAAAAAAAABE/zzg10zkwrvw/photo.jpg
+    class func stripQueryFromUrl(queryUrl: String) -> String{
+        if let url = NSURL(string: queryUrl),
+            urlComponent = NSURLComponents(URL: url, resolvingAgainstBaseURL: false){
+            urlComponent.query = nil
+            return urlComponent.string!
+        }else{
+            return queryUrl
+        }
+    }
+    
+    // Present the UIActivityViewController
+    class func shareItems(vc: UIViewController, items: [AnyObject]) {
+        // Define iOS share controller
+        let avc = UIActivityViewController(activityItems: items, applicationActivities: [])
+        
+        avc.excludedActivityTypes = [UIActivityTypeOpenInIBooks, UIActivityTypeAssignToContact]
+        
+        // Define the completion action
+        avc.completionWithItemsHandler = {(activityType, completed:Bool, returnedItems:[AnyObject]?, error:NSError?) in
+            // If cancelled
+            if (!completed){
+                return
+            }else{
+                // Show complete message if saved to camera roll
+                //                if activityType == UIActivityTypeSaveToCameraRoll{
+                //                    Utilities.displayAlert(self, message: "Succesfully save the photo to camera roll", title: "Save Completed")
+                //                }
+                return
+            }
+        }
+        // Present the share controller
+        vc.presentViewController(avc, animated: true, completion: nil)
+    }
 }
