@@ -23,7 +23,7 @@ class PostVC: PostBaseVC, NSFetchedResultsControllerDelegate {
         if !post.photos.isEmpty{
             postImageView.hidden = false
             let photo = post.photos[0]
-            APIBaseClient.sharedInstance().taskForImage(photo.fullUrl){ (imageData, error) in
+            APIBaseClient.sharedInstance.taskForImage(photo.fullUrl){ (imageData, error) in
                 if let data = imageData{
                     Utilities.performUIUpdatesOnMain(){
                         let image = UIImage(data: data)

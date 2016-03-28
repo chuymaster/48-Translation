@@ -84,7 +84,7 @@ class MemberTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
         cell.descriptionTextView.scrollRangeToVisible(NSMakeRange(0, 0))
         cell.memberImage.contentMode = .ScaleAspectFill
         
-        let task = APIBaseClient.sharedInstance().taskForImage(member.imageUrl){ (imageData, error) in
+        let task = APIBaseClient.sharedInstance.taskForImage(member.imageUrl){ (imageData, error) in
             if let data = imageData{
                 Utilities.performUIUpdatesOnMain(){
                     let image = UIImage(data: data)

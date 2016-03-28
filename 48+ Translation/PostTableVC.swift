@@ -103,7 +103,7 @@ class PostTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
         let photos = post.photos
         if !photos.isEmpty {
             let photo = photos[0]
-            let task = APIBaseClient.sharedInstance().taskForImage(photo.thumbUrl){ (imageData, error) in
+            let task = APIBaseClient.sharedInstance.taskForImage(photo.thumbUrl){ (imageData, error) in
                 if let data = imageData{
                     Utilities.performUIUpdatesOnMain(){
                         let image = UIImage(data: data)

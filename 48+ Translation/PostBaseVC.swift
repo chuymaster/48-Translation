@@ -36,7 +36,7 @@ class PostBaseVC: UIViewController {
         contentTextView.scrollRangeToVisible(NSMakeRange(0, 0))
     }
     
-        // Action when imageview is pressed long
+    // Action when imageview is pressed long
     func longPressed(sender: UILongPressGestureRecognizer) {
         // Prevent consecutive calling by very long press
         if (sender.state != .Began) {

@@ -15,14 +15,8 @@ class APIBaseClient : NSObject{
     var app = UIApplication.sharedApplication().delegate as! AppDelegate
     var sharedSession = NSURLSession.sharedSession()
     
-    class func sharedInstance() -> APIBaseClient {
-        
-        struct Singleton {
-            static var sharedInstance = APIBaseClient()
-        }
-        
-        return Singleton.sharedInstance
-    }
+    // Singleton
+    static let sharedInstance = APIBaseClient()
     
     // MARK: GET
     func taskForGETMethod(url: String, headers: [String:AnyObject], parameters: [String:AnyObject], completionHandler: (result: AnyObject!, error: NSError?) -> Void) -> NSURLSessionDataTask{

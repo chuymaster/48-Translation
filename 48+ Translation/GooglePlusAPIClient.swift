@@ -12,31 +12,41 @@ import CoreData
 
 class GooglePlusAPIClient : NSObject{
     
-    let api = APIBaseClient.sharedInstance()
+    let api = APIBaseClient.sharedInstance
     
     // Get member profiles and save to the CoreDataStackManager
     func getMemberList(){
-        // TODO: Use GDC to dispatch request serially
-        for id in Constants.Database.MemberUserIdList{
-            var _requestFinished = false
-            getMember(id){ (result, errorString) in
-                _requestFinished = true
-                if result == true{
-                    print("ID: \(id) Request result: \(result)")
+        
+        // Create new queue to disblock UI update
+        var priority = DISPATCH_QUEUE_PRIORITY_HIGH
+        dispatch_async(dispatch_get_global_queue(priority, 0)){
+            
+            // Loop through all member id
+            for id in Constants.Database.MemberUserIdList{
+                // Create new serial queue on the background thread
+                priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
+                dispatch_sync(dispatch_get_global_queue(priority, 0)){
                     
-                    // If it is the last member's request, save context
-                    if id == Constants.Database.MemberUserIdList[Constants.Database.MemberUserIdList.count - 1] {
-                        Utilities.performUIUpdatesOnMain(){
-                            CoreDataStackManager.sharedInstance().saveContext()
+                    NSLog("Is MainThread: \(NSThread.isMainThread())")
+                    var _requestFinished = false
+                    // Request to API
+                    self.getMember(id) { (result, errorString) in
+                        _requestFinished = true
+                        if result == true{
+                            NSLog("ID: \(id) Request result: \(result)")
+                        }else{
+                            NSLog("ID: \(id) Request result: \(result)")
+                            NSLog(errorString!)
+                        }
+                        // Update CoreData on the main thread
+                        Utilities.performUIUpdatesOnMain(){                            CoreDataStackManager.sharedInstance().saveContext()
                         }
                     }
-                }else{
-                    print(errorString)
+                    // Wait until the data is fully retrieve before initiating new API request
+                    while _requestFinished == false {
+                        continue
+                    }
                 }
-            }
-            
-            while _requestFinished == false {
-                continue
             }
         }
     }
@@ -90,9 +100,6 @@ class GooglePlusAPIClient : NSObject{
                 //print(member)
                 
                 completionHandler(result: true, errorString: nil)
-
-                // Get post form the member
-                //self.getPost(member, completionHandler: completionHandler)
             }
         }
     }
