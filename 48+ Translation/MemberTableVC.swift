@@ -13,6 +13,8 @@ class MemberTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
     
     // MARK: Class Variables
     var members: [Member] = [Member]()
+    var likedOnly = false
+    @IBOutlet weak var likedSegmentControl: UISegmentedControl!
     @IBOutlet var memberTableView: UITableView!
     
     // NSFetchedResultsController for Member entity
@@ -31,34 +33,64 @@ class MemberTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
         
         fetchedResultsController.delegate = self
         _fetchMember()
-        
-        // If no member in database, load new data
-        if members.isEmpty{
-            _getMember()
-        }else{
-            NSLog("Member count: \(members.count)")
-        }
+        _loadPreference()
+        _getMember()
     }
     
-    // Remove and refresh all items
-    @IBAction func refreshAction(sender: AnyObject) {
-        _fetchMember()
-        for member in members{
-            Utilities.sharedContext.deleteObject(member)
+    @IBAction func toggleMode(sender: AnyObject) {
+        switch likedSegmentControl.selectedSegmentIndex
+        {
+        // Show all member
+        case 0:
+            likedOnly = false
+            memberTableView.reloadData()
+        // Show liked member only
+        case 1:
+            likedOnly = true
+            memberTableView.reloadData()
+        default:
+            break;
         }
-        Utilities.saveContextInMainQueue()
-        _getMember()
+        _savePreference()
+    }
+    
+    // MARK: Private business functions
+    
+    private func _loadPreference(){
+        // Load user preference
+        if let preferenceDictionary = NSKeyedUnarchiver.unarchiveObjectWithFile(Utilities.userPreferenceFilePath) as? [String: AnyObject]{
+            let toggleLikeFlag = preferenceDictionary["toggleLikeFlag"] as! Bool
+            likedOnly = toggleLikeFlag
+            likedSegmentControl.selectedSegmentIndex = Int(likedOnly)
+        }
+    }
+    private func _savePreference(){
+        // Save user preference
+        let preferenceDictionary = [
+            "toggleLikeFlag": likedOnly,
+        ]
+        NSKeyedArchiver.archiveRootObject(preferenceDictionary, toFile: Utilities.userPreferenceFilePath)
     }
     
     private func _getMember(){
         let api = GooglePlusAPIClient()
-        api.getMemberList(){ (result, errorString) in
+        api.getMemberList(true){ (result, errorString) in
             dispatch_async(dispatch_get_main_queue()){
                 if result == false{
                     Utilities.displayAlert(self, message: errorString!)
                 }
             }
         }
+    }
+    
+    // Remove and reload all members (disabled)
+    private func _refreshMember() {
+        _fetchMember()
+        for member in members{
+            Utilities.sharedContext.deleteObject(member)
+        }
+        Utilities.saveContextInMainQueue()
+        _getMember()
     }
     
     private func _fetchMember(){
@@ -85,7 +117,23 @@ class MemberTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
         
         configureCell(cell,member: member)
         
+        // Check liked mode
+        if likedOnly && !member.favoriteFlag{
+            cell.hidden = true
+        }
+        
         return cell
+    }
+    
+    override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+        let member = fetchedResultsController.objectAtIndexPath(indexPath) as! Member
+        
+        // Check liked mode
+        if likedOnly && !member.favoriteFlag{
+            return 0
+        }else{
+            return 101
+        }
     }
     
     // MARK: - Configure Cell

@@ -96,4 +96,10 @@ class Utilities{
         // Present the share controller
         vc.presentViewController(avc, animated: true, completion: nil)
     }
+    
+    class var userPreferenceFilePath : String {
+        let manager = NSFileManager.defaultManager()
+        let url = manager.URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first!
+        return url.URLByAppendingPathComponent("preference").path!
+    }
 }

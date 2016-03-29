@@ -148,13 +148,22 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Member" id="9P1-hO-1WN">
-                        <barButtonItem key="rightBarButtonItem" systemItem="refresh" id="PLw-Oc-5Nl">
-                            <connections>
-                                <action selector="refreshAction:" destination="bCb-N8-Z1q" id="0a3-K8-pbc"/>
-                            </connections>
+                        <barButtonItem key="leftBarButtonItem" style="plain" id="Dmq-6d-29T">
+                            <segmentedControl key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="bar" selectedSegmentIndex="0" id="e8V-Oi-Zhh">
+                                <rect key="frame" x="-60" y="-14" width="121" height="29"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <segments>
+                                    <segment title="All" width="50"/>
+                                    <segment title="Liked" width="50"/>
+                                </segments>
+                                <connections>
+                                    <action selector="toggleMode:" destination="bCb-N8-Z1q" eventType="valueChanged" id="9S3-EX-4N9"/>
+                                </connections>
+                            </segmentedControl>
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="likedSegmentControl" destination="e8V-Oi-Zhh" id="HkO-NE-mRb"/>
                         <outlet property="memberTableView" destination="Fhy-Gb-Nic" id="ngg-AX-pdp"/>
                     </connections>
                 </tableViewController>
@@ -302,12 +311,15 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Posts" id="mJe-4a-P6v">
-                        <barButtonItem key="rightBarButtonItem" systemItem="refresh" id="PMd-T9-T2u">
+                        <barButtonItem key="rightBarButtonItem" title="Like" id="er2-KZ-pvL">
                             <connections>
-                                <action selector="refreshAction:" destination="eey-f7-y4X" id="A4h-ZS-Vew"/>
+                                <action selector="likeMember:" destination="eey-f7-y4X" id="QpH-kt-NJw"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
+                    <connections>
+                        <outlet property="likeButton" destination="er2-KZ-pvL" id="vV4-lQ-YBz"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="CCK-67-rlt" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>

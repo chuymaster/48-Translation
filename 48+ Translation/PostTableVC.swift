@@ -14,10 +14,15 @@ class PostTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
     var member: Member!
     var api: GooglePlusAPIClient!
     var posts: [Post]!
+    @IBOutlet weak var likeButton: UIBarButtonItem!
     
     override func viewDidLoad() {
         self.title = member.displayName
-        //print("\(posts[0].member?.givenName) has \(posts.count) posts")
+        if member.favoriteFlag{
+            likeButton.title = "Unlike"
+        }else{
+            likeButton.title = "Like"
+        }
         
         fetchedResultsController.delegate = self
         api = GooglePlusAPIClient()
@@ -28,17 +33,17 @@ class PostTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
             posts = fetchedResultsController.fetchedObjects as! [Post]
         }catch{}
         
-        // If no post in database, load new data
+        // Load new post if no data
+        var _checkExisting = true
         if posts.isEmpty{
-            api.getPost(member, checkExisting: false) { (result, errorString) in
-                dispatch_async(dispatch_get_main_queue()){
-                    if result == false{
-                        Utilities.displayAlert(self, message: errorString!)
-                    }
+            _checkExisting = false
+        }
+        api.getPost(member, checkExisting: _checkExisting) { (result, errorString) in
+            dispatch_async(dispatch_get_main_queue()){
+                if result == false{
+                    Utilities.displayAlert(self, message: errorString!)
                 }
             }
-        }else{
-            NSLog("Post count: \(posts.count)")
         }
     }
     
@@ -54,18 +59,13 @@ class PostTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
         return fetchedResultsController
     }()
     
-    override func viewWillAppear(animated: Bool) {
-        super.viewWillAppear(animated)
-    }
-
-    // Load new items
-    @IBAction func refreshAction(sender: AnyObject) {
-        api.getPost(member, checkExisting: true) { (result, errorString) in
-            dispatch_async(dispatch_get_main_queue()){
-                if result == false{
-                    Utilities.displayAlert(self, message: errorString!)
-                }
-            }
+    @IBAction func likeMember(sender: AnyObject) {
+        member.favoriteFlag = !member.favoriteFlag
+        Utilities.saveContextInMainQueue()
+        if member.favoriteFlag{
+            likeButton.title = "Unlike"
+        }else{
+            likeButton.title = "Like"
         }
     }
     

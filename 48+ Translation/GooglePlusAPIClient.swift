@@ -15,7 +15,22 @@ class GooglePlusAPIClient : NSObject{
     let api = APIBaseClient.sharedInstance
     
     // Get member profiles and save to the CoreDataStackManager
-    func getMemberList(completionHandler:(result:Bool, errorString: String?) -> Void){
+    func getMemberList(checkExisting: Bool, completionHandler:(result:Bool, errorString: String?) -> Void){
+        
+        var members = [Member]()
+        
+        if checkExisting{
+            // Fetch existing members
+            let fetchRequest = NSFetchRequest(entityName: "Member")
+            fetchRequest.sortDescriptors = [NSSortDescriptor(key: "order", ascending: false)]
+            let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,managedObjectContext: Utilities.sharedContext,sectionNameKeyPath: nil,cacheName: nil)
+            do{
+                try fetchedResultsController.performFetch()
+                members = fetchedResultsController.fetchedObjects as! [Member]
+            }catch{
+                NSLog(Message.Error.ER007.message)
+            }
+        }
         
         // Create new queue to disblock UI update
         var priority = DISPATCH_QUEUE_PRIORITY_HIGH
@@ -30,22 +45,33 @@ class GooglePlusAPIClient : NSObject{
                 priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
                 dispatch_sync(dispatch_get_global_queue(priority, 0)){
                     
-                    NSLog("Is MainThread: \(NSThread.isMainThread())")
-                    var _requestFinished = false
-                    // Request to API
-                    self.getMember(id.id, order: id.order) { (result, errorString) in
-                        _requestFinished = true
-                        if result == true{
-                            NSLog("ID: \(id) Request result: \(result)")
-                        }else{
-                            NSLog("ID: \(id) Request result: \(result)")
-                            _hasError = true
-                            _errorString = errorString!
+                    // Check if member already loaded
+                    var _newFlag = true
+                    for member in members{
+                        dispatch_sync(dispatch_get_main_queue()){
+                            if id.id == member.id{
+                                _newFlag = false
+                            }
                         }
                     }
-                    // Wait until the data is fully retrieve before initiating new API request
-                    while _requestFinished == false {
-                        continue
+                    if _newFlag{
+                        NSLog("Is MainThread: \(NSThread.isMainThread())")
+                        var _requestFinished = false
+                        // Request to API
+                        self.getMember(id.id, order: id.order) { (result, errorString) in
+                            _requestFinished = true
+                            if result == true{
+                                NSLog("ID: \(id) Request result: \(result)")
+                            }else{
+                                NSLog("ID: \(id) Request result: \(result)")
+                                _hasError = true
+                                _errorString = errorString!
+                            }
+                        }
+                        // Wait until the data is fully retrieve before initiating new API request
+                        while _requestFinished == false {
+                            continue
+                        }
                     }
                 }
                 if _hasError{
@@ -147,9 +173,6 @@ class GooglePlusAPIClient : NSObject{
         }
         
         self.api.taskForGETMethod(url.absoluteString, headers: [:], parameters: keyDictionary) {(result, error) in
-            // Counter for the number of post created
-            var counter = 0
-            
             func completeWithError(error: AnyObject!){
                 completionHandler(result: false, errorString: "\(error)")
             }
@@ -176,8 +199,7 @@ class GooglePlusAPIClient : NSObject{
                             }
                         }
                         // If it's the new post, create new object
-                        if _newFlag == true{
-                            counter += 1
+                        if _newFlag{
                             // Get request data
                             if let title = item[Constants.GooglePlusApi.ActivitiesAPI.ResponseKeys.Title] as? String,
                                 content = item[Constants.GooglePlusApi.ActivitiesAPI.ResponseKeys.Object]?[Constants.GooglePlusApi.ActivitiesAPI.ResponseKeys.Content] as? String,
@@ -228,12 +250,7 @@ class GooglePlusAPIClient : NSObject{
                         }
                     }
                 }
-                // If message are downloaded, return true
-                if counter > 0{
-                    completionHandler(result: true, errorString: nil)
-                }else{
-                    completionHandler(result: false, errorString: Message.Warning.WA001.message)
-                }
+                completionHandler(result: true, errorString: nil)
             }
         }
     }
