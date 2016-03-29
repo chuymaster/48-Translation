@@ -10,6 +10,40 @@ import UIKit
 
 extension TranslateVC{
     
+    // MARK: TextView Events
+    
+    // Resign keyboard when contentTextView is tabbed
+    func tapContentTextView(sender: UITapGestureRecognizer){
+        if (sender.state != .Ended){
+            return
+        }
+        translatedTextView.resignFirstResponder()
+    }
+    
+    func textView(textView: UITextView, shouldChangeTextInRange range: NSRange, replacementText text: String) -> Bool {
+        post.translatedContent = textView.text
+        CoreDataStackManager.sharedInstance().saveContext()
+        return true
+    }
+    
+    func textViewDidBeginEditing(textView: UITextView) {
+        if textView.textColor == UIColor.lightGrayColor() {
+            textView.text = nil
+            textView.textColor = UIColor.blackColor()
+        }
+    }
+    
+    func textViewDidEndEditing(textView: UITextView) {
+        if textView.text.isEmpty {
+            post.translatedContent = textView.text
+            CoreDataStackManager.sharedInstance().saveContext()
+            textView.text = Message.General.TranslateThis
+            textView.textColor = UIColor.lightGrayColor()
+        }
+    }
+    
+    // MARK: Keyboard Events
+    
     func keyboardWillShow(notification: NSNotification){
         translateView.frame.size.height = translateView.frame.size.height - getKeyboardHeight(notification)
         postImageView.hidden = true

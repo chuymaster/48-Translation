@@ -6,7 +6,7 @@
 //  Copyright © 2016 CHATCHAI LOKNIYOM. All rights reserved.
 //
 
-import Foundation
+import UIKit
 import CoreData
 
 class Photo: NSManagedObject{
@@ -36,4 +36,34 @@ class Photo: NSManagedObject{
         favoriteFlag = false
     }
     
+    var thumbImage: UIImage? {
+        get {
+            let fileName = Constants.General.ThumbnailInitial + id + NSURL(string:url)!.lastPathComponent! + Constants.General.PhotoExtension
+            return Utilities.imageCache.imageWithIdentifier(fileName)
+        }
+        set {
+            let fileName = Constants.General.ThumbnailInitial + id + NSURL(string:url)!.lastPathComponent! + Constants.General.PhotoExtension
+            Utilities.imageCache.storeImage(newValue, withIdentifier: fileName)
+        }
+    }
+    var fullImage: UIImage? {
+        get {
+            let fileName = Constants.General.FullPhotoInitial + id + NSURL(string:url)!.lastPathComponent! + Constants.General.PhotoExtension
+            return Utilities.imageCache.imageWithIdentifier(fileName)
+        }
+        set {
+            let fileName = Constants.General.FullPhotoInitial + id + NSURL(string:url)!.lastPathComponent! + Constants.General.PhotoExtension
+            Utilities.imageCache.storeImage(newValue, withIdentifier: fileName)
+        }
+    }
+    override func prepareForDeletion() {
+        do {
+            var fileName = Constants.General.ThumbnailInitial + id + NSURL(string:url)!.lastPathComponent! + Constants.General.PhotoExtension
+            var filePath = Utilities.imageCache.pathForIdentifier(fileName)
+            try NSFileManager.defaultManager().removeItemAtPath(filePath)
+            fileName = Constants.General.FullPhotoInitial + id + NSURL(string:url)!.lastPathComponent! + Constants.General.PhotoExtension
+            filePath = Utilities.imageCache.pathForIdentifier(fileName)
+            try NSFileManager.defaultManager().removeItemAtPath(filePath)
+        } catch _ {}
+    }
 }

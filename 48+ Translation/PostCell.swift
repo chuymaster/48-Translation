@@ -12,6 +12,7 @@ class PostCell: UITableViewCell{
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var descriptionLabel: UILabel!
     @IBOutlet weak var postImage: UIImageView!
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
     var taskToCancelifCellIsReused: NSURLSessionTask? {
         didSet {

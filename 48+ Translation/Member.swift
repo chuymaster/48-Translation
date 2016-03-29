@@ -6,12 +6,13 @@
 //  Copyright © 2016 CHATCHAI LOKNIYOM. All rights reserved.
 //
 
-import Foundation
+import UIKit
 import CoreData
 
 class Member: NSManagedObject{
     
     @NSManaged var id: String
+    @NSManaged var order: NSNumber
     @NSManaged var familyName: String
     @NSManaged var givenName: String
     @NSManaged var tagLine: String
@@ -32,6 +33,7 @@ class Member: NSManagedObject{
         
         // Set value from dictionary
         id = dictionary[Constants.GooglePlusApi.PeopleAPI.ResponseKeys.Id] as! String
+        order = dictionary[Constants.General.OrderKey] as! NSNumber
         familyName = dictionary[Constants.GooglePlusApi.PeopleAPI.ResponseKeys.FamilyName] as! String
         givenName = dictionary[Constants.GooglePlusApi.PeopleAPI.ResponseKeys.GivenName] as! String
         tagLine = dictionary[Constants.GooglePlusApi.PeopleAPI.ResponseKeys.TagLine] as! String
@@ -42,5 +44,16 @@ class Member: NSManagedObject{
     
     var displayName: String {
         return "\(familyName)\(givenName)"
+    }
+    
+    var image: UIImage? {
+        get {
+            let fileName = id + "_" + (NSURL(string: imageUrl)?.lastPathComponent)!
+            return Utilities.imageCache.imageWithIdentifier(fileName)
+        }
+        set {
+            let fileName = id + "_" + (NSURL(string: imageUrl)?.lastPathComponent)!
+            Utilities.imageCache.storeImage(newValue, withIdentifier: fileName)
+        }
     }
 }

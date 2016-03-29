@@ -30,15 +30,15 @@ class PostTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
         
         // If no post in database, load new data
         if posts.isEmpty{
-            api.getPost(member) { (result, errorString) in
-                if result == true{
-                    Utilities.performUIUpdatesOnMain(){
-                        CoreDataStackManager.sharedInstance().saveContext()
+            api.getPost(member, checkExisting: false) { (result, errorString) in
+                dispatch_async(dispatch_get_main_queue()){
+                    if result == false{
+                        Utilities.displayAlert(self, message: errorString!)
                     }
                 }
             }
         }else{
-            print("Post count: \(posts.count)")
+            NSLog("Post count: \(posts.count)")
         }
     }
     
@@ -57,26 +57,13 @@ class PostTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
     }
-    
-    // Remove and refresh all items
+
+    // Load new items
     @IBAction func refreshAction(sender: AnyObject) {
-        do{
-            try fetchedResultsController.performFetch()
-            posts = fetchedResultsController.fetchedObjects as! [Post]
-            for post in posts{
-                Utilities.sharedContext.deleteObject(post)
-            }
-            
-            Utilities.performUIUpdatesOnMain(){
-                CoreDataStackManager.sharedInstance().saveContext()
-            }
-        }catch{
-        }
-        
-        api.getPost(member) { (result, errorString) in
-            if result == true{
-                Utilities.performUIUpdatesOnMain(){
-                    CoreDataStackManager.sharedInstance().saveContext()
+        api.getPost(member, checkExisting: true) { (result, errorString) in
+            dispatch_async(dispatch_get_main_queue()){
+                if result == false{
+                    Utilities.displayAlert(self, message: errorString!)
                 }
             }
         }
@@ -92,28 +79,51 @@ class PostTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cellID = "PostCell"
         let cell = tableView.dequeueReusableCellWithIdentifier(cellID, forIndexPath: indexPath) as! PostCell
-
         let post = fetchedResultsController.objectAtIndexPath(indexPath) as! Post
         
+        configureCell(cell, post: post)
+        
+        return cell
+    }
+    
+    // MARK: - Configure Cell
+    
+    func configureCell(cell: PostCell, post: Post) {
+        
+        // Configure cell items
         cell.accessoryType = .DisclosureIndicator
         cell.titleLabel.text = post.title
         cell.descriptionLabel.text = post.publishedAtString
-        cell.postImage.contentMode = .ScaleAspectFill
         
+        // Deal with photo download
         let photos = post.photos
-        if !photos.isEmpty {
+        if !photos.isEmpty{
+            
+            // Use only the first photo
             let photo = photos[0]
-            let task = APIBaseClient.sharedInstance.taskForImage(photo.thumbUrl){ (imageData, error) in
-                if let data = imageData{
-                    Utilities.performUIUpdatesOnMain(){
-                        let image = UIImage(data: data)
-                        cell.postImage.image = image
+            // Check caches
+            if photo.thumbImage != nil{
+                cell.postImage.image = photo.thumbImage
+            }else{
+                cell.postImage.alpha = 0
+                cell.activityIndicator.startAnimating()
+                let task = APIBaseClient.sharedInstance.taskForImage(photo.thumbUrl){ (imageData, error) in
+                    if let data = imageData{
+                        dispatch_async(dispatch_get_main_queue()){
+                            let image = UIImage(data: data)
+                            photo.thumbImage = image
+                            cell.postImage.image = image
+                            cell.activityIndicator.stopAnimating()
+                            UIView.animateWithDuration(0.3) {
+                                cell.postImage.alpha = 1
+                            }
+                            
+                        }
                     }
                 }
+                cell.taskToCancelifCellIsReused = task
             }
-            cell.taskToCancelifCellIsReused = task
         }
-        return cell
     }
     
     
@@ -124,7 +134,6 @@ class PostTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
             let vc = segue.destinationViewController as! PostVC
             let cell = sender as! UITableViewCell
             let indexPath = self.tableView?.indexPathForCell(cell)
-            //let post = member.posts[indexPath!.row]
             let post = fetchedResultsController.objectAtIndexPath(indexPath!) as! Post
             vc.post = post
         }

@@ -26,6 +26,7 @@
 		052F6EDF1CA4E6DF00D386DA /* PostTableVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 052F6EDE1CA4E6DF00D386DA /* PostTableVC.swift */; };
 		052F6EE11CA50F6800D386DA /* PostCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 052F6EE01CA50F6800D386DA /* PostCell.swift */; };
 		052F6EE31CA5142900D386DA /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 052F6EE21CA5142900D386DA /* Main.storyboard */; };
+		058FE1C21CAA0F0E00BD62F8 /* ImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 058FE1C11CAA0F0E00BD62F8 /* ImageCache.swift */; };
 		05C47EC21CA912D80061F2AA /* PostBaseVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05C47EC11CA912D80061F2AA /* PostBaseVC.swift */; };
 		05C47EC51CA91B080061F2AA /* TranslateVCExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05C47EC41CA91B080061F2AA /* TranslateVCExtension.swift */; };
 		05D29D1A1CA521FF00A216C2 /* PostVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D29D191CA521FF00A216C2 /* PostVC.swift */; };
@@ -77,6 +78,7 @@
 		052F6EDE1CA4E6DF00D386DA /* PostTableVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostTableVC.swift; sourceTree = "<group>"; };
 		052F6EE01CA50F6800D386DA /* PostCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostCell.swift; sourceTree = "<group>"; };
 		052F6EE21CA5142900D386DA /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
+		058FE1C11CAA0F0E00BD62F8 /* ImageCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageCache.swift; sourceTree = "<group>"; };
 		05C47EC11CA912D80061F2AA /* PostBaseVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostBaseVC.swift; sourceTree = "<group>"; };
 		05C47EC41CA91B080061F2AA /* TranslateVCExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TranslateVCExtension.swift; sourceTree = "<group>"; };
 		05D29D191CA521FF00A216C2 /* PostVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostVC.swift; sourceTree = "<group>"; };
@@ -162,9 +164,9 @@
 		051B757D1CA4CF9D0070518A /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				051B75801CA4CFCF0070518A /* API */,
-				051B75721CA4CF8E0070518A /* CoreDataStackManager.swift */,
 				051B757E1CA4CFAC0070518A /* DataModel */,
+				051B75801CA4CFCF0070518A /* API */,
+				05E8C1801CAA4C5B008E85C9 /* Helper */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -207,12 +209,7 @@
 			isa = PBXGroup;
 			children = (
 				05C47EC31CA913BD0061F2AA /* Base Class */,
-				051B753E1CA4CD060070518A /* MemberTableVC.swift */,
-				052F6EDE1CA4E6DF00D386DA /* PostTableVC.swift */,
-				05D29D191CA521FF00A216C2 /* PostVC.swift */,
-				BE34ADEF1CA570FE0004B83D /* TranslateVC.swift */,
-				05C47EC41CA91B080061F2AA /* TranslateVCExtension.swift */,
-				BE34ADF31CA625B40004B83D /* PhotoVC.swift */,
+				05E8C17F1CAA4C4B008E85C9 /* View Controller */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
@@ -225,6 +222,28 @@
 				052F6EE01CA50F6800D386DA /* PostCell.swift */,
 			);
 			name = "Base Class";
+			sourceTree = "<group>";
+		};
+		05E8C17F1CAA4C4B008E85C9 /* View Controller */ = {
+			isa = PBXGroup;
+			children = (
+				051B753E1CA4CD060070518A /* MemberTableVC.swift */,
+				052F6EDE1CA4E6DF00D386DA /* PostTableVC.swift */,
+				05D29D191CA521FF00A216C2 /* PostVC.swift */,
+				BE34ADEF1CA570FE0004B83D /* TranslateVC.swift */,
+				05C47EC41CA91B080061F2AA /* TranslateVCExtension.swift */,
+				BE34ADF31CA625B40004B83D /* PhotoVC.swift */,
+			);
+			name = "View Controller";
+			sourceTree = "<group>";
+		};
+		05E8C1801CAA4C5B008E85C9 /* Helper */ = {
+			isa = PBXGroup;
+			children = (
+				051B75721CA4CF8E0070518A /* CoreDataStackManager.swift */,
+				058FE1C11CAA0F0E00BD62F8 /* ImageCache.swift */,
+			);
+			name = Helper;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -371,6 +390,7 @@
 				052F6EE11CA50F6800D386DA /* PostCell.swift in Sources */,
 				051B757B1CA4CF8E0070518A /* Constants.swift in Sources */,
 				05D29D1A1CA521FF00A216C2 /* PostVC.swift in Sources */,
+				058FE1C21CAA0F0E00BD62F8 /* ImageCache.swift in Sources */,
 				051B75751CA4CF8E0070518A /* Utilities.swift in Sources */,
 				05C47EC51CA91B080061F2AA /* TranslateVCExtension.swift in Sources */,
 				05C47EC21CA912D80061F2AA /* PostBaseVC.swift in Sources */,

@@ -13,10 +13,17 @@ import CoreData
 
 class APIBaseClient : NSObject{
     var app = UIApplication.sharedApplication().delegate as! AppDelegate
-    var sharedSession = NSURLSession.sharedSession()
-    
+    var sharedSession : NSURLSession!
     // Singleton
     static let sharedInstance = APIBaseClient()
+    
+    override init(){
+        // Configure timeout
+        let sessionConfig = NSURLSessionConfiguration.defaultSessionConfiguration()
+        sessionConfig.timeoutIntervalForRequest = 30
+        sessionConfig.timeoutIntervalForResource = 60
+        sharedSession = NSURLSession(configuration: sessionConfig)
+    }
     
     // MARK: GET
     func taskForGETMethod(url: String, headers: [String:AnyObject], parameters: [String:AnyObject], completionHandler: (result: AnyObject!, error: NSError?) -> Void) -> NSURLSessionDataTask{
@@ -26,7 +33,7 @@ class APIBaseClient : NSObject{
         for (key, value) in headers{
             request.addValue(value as! String, forHTTPHeaderField: key)
         }
-        print("Request URL: \(request.URL!.absoluteString)")
+        NSLog("Request URL: \(request.URL!.absoluteString)")
         
         let task = sharedSession.dataTaskWithRequest(request) { (data, response, error) in
             

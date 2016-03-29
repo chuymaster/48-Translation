@@ -12,6 +12,7 @@ class MemberCell: UITableViewCell{
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var descriptionTextView: UITextView!
     @IBOutlet weak var memberImage: UIImageView!
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
     var taskToCancelifCellIsReused: NSURLSessionTask? {
         didSet {

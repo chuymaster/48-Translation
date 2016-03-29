@@ -11,6 +11,7 @@ import CoreData
 
 class PostVC: PostBaseVC, NSFetchedResultsControllerDelegate {
     
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,21 +24,31 @@ class PostVC: PostBaseVC, NSFetchedResultsControllerDelegate {
         if !post.photos.isEmpty{
             postImageView.hidden = false
             let photo = post.photos[0]
-            APIBaseClient.sharedInstance.taskForImage(photo.fullUrl){ (imageData, error) in
-                if let data = imageData{
-                    Utilities.performUIUpdatesOnMain(){
-                        let image = UIImage(data: data)
-                        self.postImageView.image = image
-                        // Add gesture recognizer only after image is loaded
-                        self.postImageView.addGestureRecognizer(self.longPressRecognizer)
-                        self.postImageView.addGestureRecognizer(self.tabRecognizer)
+            if photo.fullImage != nil{
+                postImageView.image = photo.fullImage
+            }else{
+                postImageView.alpha = 0
+                activityIndicator.startAnimating()
+                APIBaseClient.sharedInstance.taskForImage(photo.fullUrl){ (imageData, error) in
+                    if let data = imageData{
+                        dispatch_async(dispatch_get_main_queue()){
+                            let image = UIImage(data: data)
+                            photo.fullImage = image
+                            self.postImageView.image = image
+                            self.activityIndicator.stopAnimating()
+                            UIView.animateWithDuration(0.3) {
+                                self.postImageView.alpha = 1
+                            }
+                            // Add gesture recognizer only after image is loaded
+                            self.postImageView.addGestureRecognizer(self.longPressRecognizer)
+                            self.postImageView.addGestureRecognizer(self.tabRecognizer)
+                        }
                     }
                 }
             }
         }else{
             postImageView.hidden = true
         }
-
     }
     
     // MARK: Segue to next view controller

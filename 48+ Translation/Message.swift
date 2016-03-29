@@ -20,5 +20,11 @@ struct Message{
         static let ER004 = (code:-4, message:"There was an when downloading photos.")
         static let ER005 = (code:-5, message:"Could not parse the data as JSON.")
         static let ER006 = (code:-6, message:"There is an error in response content.")
+        static let ER007 = (code:-7, message:"Failed to fetch members.")
+        static let ER008 = (code:-8, message:"Failed to fetch posts.")
+        
+    }
+    struct Warning{
+        static let WA001 = (code:1, message:"No new post.")
     }
 }

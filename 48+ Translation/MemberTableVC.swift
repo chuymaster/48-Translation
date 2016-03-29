@@ -14,12 +14,11 @@ class MemberTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
     // MARK: Class Variables
     var members: [Member] = [Member]()
     @IBOutlet var memberTableView: UITableView!
-    var api: GooglePlusAPIClient!
     
     // NSFetchedResultsController for Member entity
     lazy var fetchedResultsController: NSFetchedResultsController = {
         let fetchRequest = NSFetchRequest(entityName: "Member")
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "familyName", ascending: true)]
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "order", ascending: true)]
         let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,
                                                                   managedObjectContext: Utilities.sharedContext,
                                                                   sectionNameKeyPath: nil,
@@ -31,37 +30,44 @@ class MemberTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
     override func viewDidLoad() {
         
         fetchedResultsController.delegate = self
-        api = GooglePlusAPIClient()
+        _fetchMember()
         
+        // If no member in database, load new data
+        if members.isEmpty{
+            _getMember()
+        }else{
+            NSLog("Member count: \(members.count)")
+        }
+    }
+    
+    // Remove and refresh all items
+    @IBAction func refreshAction(sender: AnyObject) {
+        _fetchMember()
+        for member in members{
+            Utilities.sharedContext.deleteObject(member)
+        }
+        Utilities.saveContextInMainQueue()
+        _getMember()
+    }
+    
+    private func _getMember(){
+        let api = GooglePlusAPIClient()
+        api.getMemberList(){ (result, errorString) in
+            dispatch_async(dispatch_get_main_queue()){
+                if result == false{
+                    Utilities.displayAlert(self, message: errorString!)
+                }
+            }
+        }
+    }
+    
+    private func _fetchMember(){
         // Fetch members from database
         do{
             try fetchedResultsController.performFetch()
             members = fetchedResultsController.fetchedObjects as! [Member]
         }catch{
         }
-        
-        // If no member in database, load new data
-        if members.isEmpty{
-            api.getMemberList()
-        }else{
-            print("Member count: \(members.count)")
-        }
-    }
-    
-    // Remove and refresh all items
-    @IBAction func refreshAction(sender: AnyObject) {
-        do{
-            try fetchedResultsController.performFetch()
-            members = fetchedResultsController.fetchedObjects as! [Member]
-            for member in members{
-                Utilities.sharedContext.deleteObject(member)
-            }
-            Utilities.performUIUpdatesOnMain(){
-                CoreDataStackManager.sharedInstance().saveContext()
-            }
-        }catch{
-        }
-        api.getMemberList()
     }
     
     // MARK: - Table View Delegate
@@ -77,23 +83,42 @@ class MemberTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
         
         let member = fetchedResultsController.objectAtIndexPath(indexPath) as! Member
         
+        configureCell(cell,member: member)
+        
+        return cell
+    }
+    
+    // MARK: - Configure Cell
+    
+    func configureCell(cell: MemberCell, member: Member) {
+        
+        // Configure cell items
         cell.accessoryType = .DisclosureIndicator
         cell.titleLabel.text = member.displayName
         cell.descriptionTextView.text = member.tagLine
-        // Scroll textview to the top
         cell.descriptionTextView.scrollRangeToVisible(NSMakeRange(0, 0))
-        cell.memberImage.contentMode = .ScaleAspectFill
         
-        let task = APIBaseClient.sharedInstance.taskForImage(member.imageUrl){ (imageData, error) in
-            if let data = imageData{
-                Utilities.performUIUpdatesOnMain(){
-                    let image = UIImage(data: data)
-                    cell.memberImage.image = image
+        // Deal with photo download
+        if member.image != nil{
+            cell.memberImage.image = member.image
+        }else{
+            cell.memberImage.alpha = 0
+            cell.activityIndicator.startAnimating()
+            let task = APIBaseClient.sharedInstance.taskForImage(member.imageUrl){ (imageData, error) in
+                if let data = imageData{
+                    dispatch_async(dispatch_get_main_queue()){
+                        let image = UIImage(data: data)
+                        member.image = image
+                        cell.memberImage.image = image
+                        cell.activityIndicator.stopAnimating()
+                        UIView.animateWithDuration(0.3) {
+                            cell.memberImage.alpha = 1
+                        }
+                    }
                 }
             }
+            cell.taskToCancelifCellIsReused = task
         }
-        cell.taskToCancelifCellIsReused = task
-        return cell
     }
     
     // Disable Delete operation

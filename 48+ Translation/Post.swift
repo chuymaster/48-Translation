@@ -6,7 +6,7 @@
 //  Copyright © 2016 CHATCHAI LOKNIYOM. All rights reserved.
 //
 
-import Foundation
+import UIKit
 import CoreData
 
 class Post: NSManagedObject{

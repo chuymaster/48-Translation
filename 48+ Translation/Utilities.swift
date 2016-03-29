@@ -11,6 +11,8 @@ import UIKit
 import CoreData
 
 class Utilities{
+    static let imageCache = ImageCache()
+    
     // Substitute key in url with value
     class func substituteKeyInUrl(url: String, key: String, value: String) -> String? {
         if url.rangeOfString("{\(key)}") != nil {
@@ -28,13 +30,14 @@ class Utilities{
         vc.presentViewController(alertController, animated: true, completion: nil)
     }
     
-    class func performUIUpdatesOnMain(updates: () -> Void) {
-        dispatch_async(dispatch_get_main_queue()) {
-            updates()
-        }
-    }
     class var sharedContext: NSManagedObjectContext {
         return CoreDataStackManager.sharedInstance().managedObjectContext
+    }
+    
+    class func saveContextInMainQueue(){
+        dispatch_async(dispatch_get_main_queue()){
+            CoreDataStackManager.sharedInstance().saveContext()
+        }
     }
     
     // Convert Google Plus thumbnail photo url to full size photo url
@@ -71,21 +74,22 @@ class Utilities{
     
     // Present the UIActivityViewController
     class func shareItems(vc: UIViewController, items: [AnyObject]) {
-        // Define iOS share controller
         let avc = UIActivityViewController(activityItems: items, applicationActivities: [])
-        
         avc.excludedActivityTypes = [UIActivityTypeOpenInIBooks, UIActivityTypeAssignToContact]
         
-        // Define the completion action
         avc.completionWithItemsHandler = {(activityType, completed:Bool, returnedItems:[AnyObject]?, error:NSError?) in
+            if activityType != nil{
+                NSLog("Activity: " + activityType!)
+            }
+            
             // If cancelled
             if (!completed){
                 return
             }else{
                 // Show complete message if saved to camera roll
-                //                if activityType == UIActivityTypeSaveToCameraRoll{
-                //                    Utilities.displayAlert(self, message: "Succesfully save the photo to camera roll", title: "Save Completed")
-                //                }
+                if activityType == UIActivityTypeSaveToCameraRoll{
+                    Utilities.displayAlert(vc, message: "Saved photo", title: "Complete")
+                }
                 return
             }
         }
