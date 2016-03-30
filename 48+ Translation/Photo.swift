@@ -9,6 +9,7 @@
 import UIKit
 import CoreData
 
+/// Photo data model
 class Photo: NSManagedObject{
     
     @NSManaged var id: String

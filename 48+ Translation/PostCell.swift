@@ -8,6 +8,7 @@
 
 import UIKit
 
+/// Post cell class
 class PostCell: UITableViewCell{
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var descriptionLabel: UILabel!

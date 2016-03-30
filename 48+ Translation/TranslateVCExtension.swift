@@ -8,6 +8,7 @@
 
 import UIKit
 
+/// Extension of TranslateVC with code regarding TextView and Keyboard events
 extension TranslateVC{
     
     // MARK: TextView Events
@@ -37,7 +38,7 @@ extension TranslateVC{
         if textView.text.isEmpty {
             post.translatedContent = textView.text
             CoreDataStackManager.sharedInstance().saveContext()
-            textView.text = Message.General.TranslateThis
+            textView.text = Message.General.MS001
             textView.textColor = UIColor.lightGrayColor()
         }
     }

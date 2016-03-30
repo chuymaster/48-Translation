@@ -208,20 +208,20 @@
 		051B75811CA4CFE30070518A /* Controller */ = {
 			isa = PBXGroup;
 			children = (
-				05C47EC31CA913BD0061F2AA /* Base Class */,
+				05C47EC31CA913BD0061F2AA /* Base View Controller */,
 				05E8C17F1CAA4C4B008E85C9 /* View Controller */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
 		};
-		05C47EC31CA913BD0061F2AA /* Base Class */ = {
+		05C47EC31CA913BD0061F2AA /* Base View Controller */ = {
 			isa = PBXGroup;
 			children = (
 				05C47EC11CA912D80061F2AA /* PostBaseVC.swift */,
 				051B756A1CA4CEC50070518A /* MemberCell.swift */,
 				052F6EE01CA50F6800D386DA /* PostCell.swift */,
 			);
-			name = "Base Class";
+			name = "Base View Controller";
 			sourceTree = "<group>";
 		};
 		05E8C17F1CAA4C4B008E85C9 /* View Controller */ = {
@@ -326,7 +326,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 051B75341CA4CD040070518A /* Build configuration list for PBXProject "48+ Translation" */;
+			buildConfigurationList = 051B75341CA4CD040070518A /* Build configuration list for PBXProject "Trans48+" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -607,7 +607,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		051B75341CA4CD040070518A /* Build configuration list for PBXProject "48+ Translation" */ = {
+		051B75341CA4CD040070518A /* Build configuration list for PBXProject "Trans48+" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				051B755F1CA4CD060070518A /* Debug */,

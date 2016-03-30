@@ -9,6 +9,7 @@
 import UIKit
 import CoreData
 
+/// Post data model
 class Post: NSManagedObject{
     
     @NSManaged var id: String

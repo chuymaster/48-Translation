@@ -8,6 +8,7 @@
 
 import UIKit
 
+/// Member cell class
 class MemberCell: UITableViewCell{
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var descriptionTextView: UITextView!

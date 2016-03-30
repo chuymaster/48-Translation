@@ -7,6 +7,7 @@
 //
 import UIKit
 
+/// Image cache helper
 class ImageCache {
     
     private var inMemoryCache = NSCache()
@@ -33,7 +34,7 @@ class ImageCache {
         
         // Next Try the hard drive
         if let data = NSData(contentsOfFile: path) {
-            NSLog("Load " + path)
+            NSLog("Loaded " + path)
             return UIImage(data: data)
         }
         
@@ -62,7 +63,7 @@ class ImageCache {
         // And in documents directory
         let data = UIImageJPEGRepresentation(image!, 0.8)!
         data.writeToFile(path, atomically: true)
-        NSLog("Save " + path)
+        NSLog("Saved " + path)
     }
     
     // MARK: - Helper

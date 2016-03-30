@@ -10,6 +10,7 @@ import Foundation
 import UIKit
 import CoreData
 
+/// Google Plus API client model
 class GooglePlusAPIClient : NSObject{
     
     let api = APIBaseClient.sharedInstance
@@ -55,7 +56,7 @@ class GooglePlusAPIClient : NSObject{
                         }
                     }
                     if _newFlag{
-                        NSLog("Is MainThread: \(NSThread.isMainThread())")
+                        NSLog("MainThread: \(NSThread.isMainThread())")
                         var _requestFinished = false
                         // Request to API
                         self.getMember(id.id, order: id.order) { (result, errorString) in
@@ -86,7 +87,7 @@ class GooglePlusAPIClient : NSObject{
     // Get Member Profile
     func getMember(id: String, order: Int, completionHandler:(result: Bool, errorString: String?) -> Void){
         
-        let url = _getBaseUrl(id)
+        let url = getBaseUrl(id)
         
         let keyDictionary = [
             Constants.GooglePlusApi.ParameterKeys.Key: Constants.GooglePlusApi.ParameterValues.Key,
@@ -101,7 +102,7 @@ class GooglePlusAPIClient : NSObject{
                 completeWithError(er.localizedDescription)
                 return
             }else{
-                // print("ID: \(id) JSON Result: \(result)")
+                print("Member ID: \(id) JSON Result: \(result)")
                 // Guard against retrieved data
                 guard let
                     id = result[Constants.GooglePlusApi.PeopleAPI.ResponseKeys.Id] as? String,
@@ -133,10 +134,10 @@ class GooglePlusAPIClient : NSObject{
                 
                 // Update CoreData on the main thread
                 dispatch_async(dispatch_get_main_queue()){
-                    let _ = Member(dictionary: dictionary, context: Utilities.sharedContext)
+                    let member = Member(dictionary: dictionary, context: Utilities.sharedContext)
                     CoreDataStackManager.sharedInstance().saveContext()
+                    debugPrint(member)
                 }
-                //print(member)
                 
                 completionHandler(result: true, errorString: nil)
             }
@@ -145,7 +146,7 @@ class GooglePlusAPIClient : NSObject{
     
     func getPost(member: Member, checkExisting: Bool, completionHandler:(result: Bool, errorString: String?) -> Void){
         
-        var url = _getBaseUrl(member.id)
+        var url = getBaseUrl(member.id)
         url = url.URLByAppendingPathComponent(Constants.GooglePlusApi.ActivitiesAPI.AppendPath)
         
         let keyDictionary = [
@@ -231,7 +232,7 @@ class GooglePlusAPIClient : NSObject{
                                 dispatch_async(dispatch_get_main_queue()){
                                     let post = Post(dictionary: postDictionary, context: Utilities.sharedContext)
                                     post.member = member
-                                    //print(post)
+                                    debugPrint(post)
                                     // Get attachment data to create a photo
                                     if let attachments = item[Constants.GooglePlusApi.ActivitiesAPI.ResponseKeys.Object]?[Constants.GooglePlusApi.ActivitiesAPI.ResponseKeys.Attachments] as? [[String:AnyObject]]{
                                         let attachment = attachments[0] as [String:AnyObject]
@@ -240,7 +241,7 @@ class GooglePlusAPIClient : NSObject{
                                             for dictionary in photoDictionary{
                                                 let photo = Photo(dictionary: dictionary, context: Utilities.sharedContext)
                                                 photo.post = post
-                                                //print(photo)
+                                                debugPrint(photo)
                                             }
                                         }
                                     }
@@ -328,8 +329,8 @@ class GooglePlusAPIClient : NSObject{
         return photoDictionary
     }
     
-    // Get base url for the member id
-    private func _getBaseUrl(id: String) -> NSURL {
+    // Get base Google+ request url for the member id
+    private func getBaseUrl(id: String) -> NSURL {
         
         var url = NSURL(string: Constants.GooglePlusApi.ApiBaseURL)
         url = url!.URLByAppendingPathComponent(Constants.GooglePlusApi.PeopleAPI.AppendPath)

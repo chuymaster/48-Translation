@@ -9,6 +9,7 @@
 import UIKit
 import CoreData
 
+/// Member table view controller class
 class MemberTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
     
     // MARK: Class Variables
@@ -29,12 +30,13 @@ class MemberTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
     }()
     
     // MARK: View Controller Events
+    
     override func viewDidLoad() {
         
         fetchedResultsController.delegate = self
-        _fetchMember()
-        _loadPreference()
-        _getMember()
+        fetchMember()
+        loadPreference()
+        getMember()
     }
     
     @IBAction func toggleMode(sender: AnyObject) {
@@ -51,12 +53,12 @@ class MemberTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
         default:
             break;
         }
-        _savePreference()
+        savePreference()
     }
     
-    // MARK: Private business functions
+    // MARK: Business functions
     
-    private func _loadPreference(){
+    func loadPreference(){
         // Load user preference
         if let preferenceDictionary = NSKeyedUnarchiver.unarchiveObjectWithFile(Utilities.userPreferenceFilePath) as? [String: AnyObject]{
             let toggleLikeFlag = preferenceDictionary["toggleLikeFlag"] as! Bool
@@ -64,7 +66,7 @@ class MemberTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
             likedSegmentControl.selectedSegmentIndex = Int(likedOnly)
         }
     }
-    private func _savePreference(){
+    func savePreference(){
         // Save user preference
         let preferenceDictionary = [
             "toggleLikeFlag": likedOnly,
@@ -72,7 +74,7 @@ class MemberTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
         NSKeyedArchiver.archiveRootObject(preferenceDictionary, toFile: Utilities.userPreferenceFilePath)
     }
     
-    private func _getMember(){
+    func getMember(){
         let api = GooglePlusAPIClient()
         api.getMemberList(true){ (result, errorString) in
             dispatch_async(dispatch_get_main_queue()){
@@ -84,16 +86,16 @@ class MemberTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
     }
     
     // Remove and reload all members (disabled)
-    private func _refreshMember() {
-        _fetchMember()
+    func refreshMember() {
+        fetchMember()
         for member in members{
             Utilities.sharedContext.deleteObject(member)
         }
         Utilities.saveContextInMainQueue()
-        _getMember()
+        getMember()
     }
     
-    private func _fetchMember(){
+    func fetchMember(){
         // Fetch members from database
         do{
             try fetchedResultsController.performFetch()
@@ -169,7 +171,7 @@ class MemberTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
         }
     }
     
-    // Disable Delete operation
+    // Disable Edit operation
     override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
         return false
     }

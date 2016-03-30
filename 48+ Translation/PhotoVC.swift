@@ -9,6 +9,7 @@
 import UIKit
 import CoreData
 
+/// Photo view controller class
 class PhotoVC: UIViewController {
     
     @IBOutlet weak var photoImageView: UIImageView!

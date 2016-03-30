@@ -9,6 +9,7 @@
 import UIKit
 import CoreData
 
+/// Member data model
 class Member: NSManagedObject{
     
     @NSManaged var id: String

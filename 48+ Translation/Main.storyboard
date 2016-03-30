@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10116" systemVersion="15D21" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="103-st-1d7">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10116" systemVersion="15E65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="103-st-1d7">
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
         <capability name="Alignment constraints with different attributes" minToolsVersion="5.1"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <capability name="Navigation items with more than one left or right bar item" minToolsVersion="7.0"/>
     </dependencies>
     <scenes>
         <!--Member-->
@@ -148,10 +149,11 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Member" id="9P1-hO-1WN">
-                        <barButtonItem key="leftBarButtonItem" style="plain" id="Dmq-6d-29T">
+                        <barButtonItem key="leftBarButtonItem" id="Dmq-6d-29T">
                             <segmentedControl key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="bar" selectedSegmentIndex="0" id="e8V-Oi-Zhh">
-                                <rect key="frame" x="-60" y="-14" width="121" height="29"/>
+                                <rect key="frame" x="20" y="8" width="121" height="29"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <edgeInsets key="layoutMargins" top="8" left="8" bottom="8" right="8"/>
                                 <segments>
                                     <segment title="All" width="50"/>
                                     <segment title="Liked" width="50"/>
@@ -311,7 +313,7 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Posts" id="mJe-4a-P6v">
-                        <barButtonItem key="rightBarButtonItem" title="Like" id="er2-KZ-pvL">
+                        <barButtonItem key="rightBarButtonItem" image="StarBlank" id="er2-KZ-pvL">
                             <connections>
                                 <action selector="likeMember:" destination="eey-f7-y4X" id="QpH-kt-NJw"/>
                             </connections>
@@ -396,16 +398,30 @@
                         </variation>
                     </view>
                     <navigationItem key="navigationItem" title="Post" id="7Vm-j3-iW4">
-                        <barButtonItem key="rightBarButtonItem" title="Translate" id="ouT-VZ-L89">
-                            <connections>
-                                <segue destination="A2c-EG-z1J" kind="show" identifier="TranslateSegue" id="UtD-wf-9JS"/>
-                            </connections>
-                        </barButtonItem>
+                        <rightBarButtonItems>
+                            <barButtonItem image="Translation" width="50" id="ouT-VZ-L89">
+                                <connections>
+                                    <segue destination="A2c-EG-z1J" kind="show" identifier="TranslateSegue" id="UtD-wf-9JS"/>
+                                </connections>
+                            </barButtonItem>
+                            <barButtonItem image="Down" id="bqp-Uc-WiT">
+                                <connections>
+                                    <action selector="downAction:" destination="Mdc-Ad-Rr2" id="zgs-HW-csa"/>
+                                </connections>
+                            </barButtonItem>
+                            <barButtonItem image="Up" id="gUt-gI-7si">
+                                <connections>
+                                    <action selector="upAction:" destination="Mdc-Ad-Rr2" id="35m-QC-8Ke"/>
+                                </connections>
+                            </barButtonItem>
+                        </rightBarButtonItems>
                     </navigationItem>
                     <connections>
                         <outlet property="activityIndicator" destination="kbl-k7-ePx" id="XVo-oV-8vB"/>
                         <outlet property="contentTextView" destination="Xhn-5B-s18" id="Rdw-hQ-GlF"/>
+                        <outlet property="downButton" destination="bqp-Uc-WiT" id="6Zm-WX-Svl"/>
                         <outlet property="postImageView" destination="2cC-fi-Ycq" id="WSm-M2-DP6"/>
+                        <outlet property="upButton" destination="gUt-gI-7si" id="NKz-iG-Efc"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="hBL-6d-qEb" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -562,7 +578,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="TfU-En-vpG" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1884" y="1195"/>
+            <point key="canvasLocation" x="1870.5" y="1195"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="PZE-7O-iHq">
@@ -581,4 +597,10 @@
             <point key="canvasLocation" x="-130.5" y="472"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="Down" width="25" height="25"/>
+        <image name="StarBlank" width="25" height="25"/>
+        <image name="Translation" width="25" height="25"/>
+        <image name="Up" width="25" height="25"/>
+    </resources>
 </document>

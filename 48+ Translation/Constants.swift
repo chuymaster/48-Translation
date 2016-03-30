@@ -8,7 +8,7 @@
 
 import Foundation
 
-
+/// Application constrants
 struct Constants{
     
     // MARK: HTTP Methods
@@ -29,6 +29,15 @@ struct Constants{
         static let PhotoExtension = ".jpg"
         static let ThumbnailInitial = "T"
         static let FullPhotoInitial = "F"
+    }
+    
+    // MARK: Image name
+    // https://icons8.com
+    
+    struct Image{
+        static let StarBlank = "StarBlank"
+        static let StarFilled = "StarFilled"
+        static let Translation = "Translation"
     }
     
     // MARK: Static Database

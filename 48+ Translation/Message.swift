@@ -8,10 +8,11 @@
 
 import Foundation
 
+/// Application messages
 struct Message{
     struct General{
-        static let TranslateThis = "Translate this!"
-        static let Translate = "Translate"
+        static let MS001 = "Translate this!"
+        static let MS002 = "Request URL: %@"
     }
     struct Error{
         static let ER001 = (code:-1, message:"There was an error with your request.")

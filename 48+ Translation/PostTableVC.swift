@@ -9,43 +9,13 @@
 import UIKit
 import CoreData
 
+/// Post table view controller class
 class PostTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
     
     var member: Member!
     var api: GooglePlusAPIClient!
     var posts: [Post]!
     @IBOutlet weak var likeButton: UIBarButtonItem!
-    
-    override func viewDidLoad() {
-        self.title = member.displayName
-        if member.favoriteFlag{
-            likeButton.title = "Unlike"
-        }else{
-            likeButton.title = "Like"
-        }
-        
-        fetchedResultsController.delegate = self
-        api = GooglePlusAPIClient()
-        
-        // Fetch posts from database
-        do{
-            try fetchedResultsController.performFetch()
-            posts = fetchedResultsController.fetchedObjects as! [Post]
-        }catch{}
-        
-        // Load new post if no data
-        var _checkExisting = true
-        if posts.isEmpty{
-            _checkExisting = false
-        }
-        api.getPost(member, checkExisting: _checkExisting) { (result, errorString) in
-            dispatch_async(dispatch_get_main_queue()){
-                if result == false{
-                    Utilities.displayAlert(self, message: errorString!)
-                }
-            }
-        }
-    }
     
     // NSFetchedResultsController for Post entity
     lazy var fetchedResultsController: NSFetchedResultsController = {
@@ -59,17 +29,82 @@ class PostTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
         return fetchedResultsController
     }()
     
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        self.title = member.displayName
+        if member.favoriteFlag{
+            likeButton.image = UIImage(named: Constants.Image.StarFilled)
+        }else{
+            likeButton.image = UIImage(named: Constants.Image.StarBlank)
+        }
+        
+        fetchedResultsController.delegate = self
+        api = GooglePlusAPIClient()
+        showLoading()
+        
+        // Fetch posts from database
+        fetchPosts()
+        
+        // Load new post if no data
+        var _checkExisting = true
+        if posts.isEmpty{
+            _checkExisting = false
+        }
+        api.getPost(member, checkExisting: _checkExisting) { (result, errorString) in
+            dispatch_async(dispatch_get_main_queue()){
+                self.hideLoading()
+                if result == false{
+                    Utilities.displayAlert(self, message: errorString!)
+                }
+            }
+        }
+    }
+    
+    // MARK: View controller functions
+    
+    /// Show alert indicating loading progress
+    func showLoading(){
+        let alert = UIAlertController(title: nil, message: "Loading...", preferredStyle: .Alert)
+        
+        alert.view.tintColor = UIColor.blackColor()
+        alert.addAction(UIAlertAction(title: "Dismiss", style: UIAlertActionStyle.Default, handler: nil))
+        let loadingIndicator: UIActivityIndicatorView = UIActivityIndicatorView(frame: CGRectMake(10, 5, 50, 50)) as UIActivityIndicatorView
+        loadingIndicator.hidesWhenStopped = true
+        loadingIndicator.activityIndicatorViewStyle = UIActivityIndicatorViewStyle.Gray
+        loadingIndicator.startAnimating();
+        
+        alert.view.addSubview(loadingIndicator)
+        presentViewController(alert, animated: true, completion: nil)
+    }
+    
+    func hideLoading(){
+        dismissViewControllerAnimated(false, completion: nil)
+    }
+    
+    func fetchPosts(){
+        do{
+            try fetchedResultsController.performFetch()
+            posts = fetchedResultsController.fetchedObjects as! [Post]
+        }catch{}
+    }
+    
     @IBAction func likeMember(sender: AnyObject) {
         member.favoriteFlag = !member.favoriteFlag
         Utilities.saveContextInMainQueue()
         if member.favoriteFlag{
-            likeButton.title = "Unlike"
+            likeButton.image = UIImage(named: Constants.Image.StarFilled)
         }else{
-            likeButton.title = "Like"
+            likeButton.image = UIImage(named: Constants.Image.StarBlank)
         }
     }
     
     // MARK: - Table View Delegate
+    
+    // Disable Edit operation
+    override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+        return false
+    }
     
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         let sectionInfo = self.fetchedResultsController.sections![section]
@@ -135,6 +170,8 @@ class PostTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
             let cell = sender as! UITableViewCell
             let indexPath = self.tableView?.indexPathForCell(cell)
             let post = fetchedResultsController.objectAtIndexPath(indexPath!) as! Post
+            fetchPosts()
+            vc.posts = posts
             vc.post = post
         }
     }

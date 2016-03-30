@@ -11,9 +11,12 @@ import Foundation
 import UIKit
 import CoreData
 
+/// API base client model
 class APIBaseClient : NSObject{
+    
     var app = UIApplication.sharedApplication().delegate as! AppDelegate
     var sharedSession : NSURLSession!
+    
     // Singleton
     static let sharedInstance = APIBaseClient()
     
@@ -33,7 +36,7 @@ class APIBaseClient : NSObject{
         for (key, value) in headers{
             request.addValue(value as! String, forHTTPHeaderField: key)
         }
-        NSLog("Request URL: \(request.URL!.absoluteString)")
+        NSLog(Message.General.MS002, request.URL!.absoluteString)
         
         let task = sharedSession.dataTaskWithRequest(request) { (data, response, error) in
             
@@ -69,14 +72,14 @@ class APIBaseClient : NSObject{
         let domain = "taskForImage"
         let fileUrl = NSURL(string: url)!
         let request = NSURLRequest(URL: fileUrl)
-        //print("Request:\(request)")
+        NSLog(Message.General.MS002, request.URL!.absoluteString)
         
         let task = sharedSession.dataTaskWithRequest(request) {data, response, error in
             
             guard (error == nil) else{
                 let errorString = Message.Error.ER004.message
                 let userInfo = ["request": (request.URL?.absoluteString)!,
-                                "HTTP method": request.HTTPMethod!,
+                                "HTTP Method": request.HTTPMethod!,
                                 NSLocalizedDescriptionKey: errorString]
                 let formattedError = NSError(domain: domain, code: Message.Error.ER004.code, userInfo: userInfo)
                 completionHandler(imageData: nil, error: formattedError)
