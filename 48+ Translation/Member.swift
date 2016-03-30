@@ -50,11 +50,11 @@ class Member: NSManagedObject{
     var image: UIImage? {
         get {
             let fileName = id + "_" + (NSURL(string: imageUrl)?.lastPathComponent)!
-            return Utilities.imageCache.imageWithIdentifier(fileName)
+            return Utilities.imageCache.imageWithIdentifier(fileName, fromDisk: true)
         }
         set {
             let fileName = id + "_" + (NSURL(string: imageUrl)?.lastPathComponent)!
-            Utilities.imageCache.storeImage(newValue, withIdentifier: fileName)
+            Utilities.imageCache.storeImage(newValue, withIdentifier: fileName, toDisk: true)
         }
     }
 }

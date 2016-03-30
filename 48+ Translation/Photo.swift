@@ -40,21 +40,21 @@ class Photo: NSManagedObject{
     var thumbImage: UIImage? {
         get {
             let fileName = Constants.General.ThumbnailInitial + id + NSURL(string:url)!.lastPathComponent! + Constants.General.PhotoExtension
-            return Utilities.imageCache.imageWithIdentifier(fileName)
+            return Utilities.imageCache.imageWithIdentifier(fileName, fromDisk: true)
         }
         set {
             let fileName = Constants.General.ThumbnailInitial + id + NSURL(string:url)!.lastPathComponent! + Constants.General.PhotoExtension
-            Utilities.imageCache.storeImage(newValue, withIdentifier: fileName)
+            Utilities.imageCache.storeImage(newValue, withIdentifier: fileName, toDisk: true)
         }
     }
     var fullImage: UIImage? {
         get {
             let fileName = Constants.General.FullPhotoInitial + id + NSURL(string:url)!.lastPathComponent! + Constants.General.PhotoExtension
-            return Utilities.imageCache.imageWithIdentifier(fileName)
+            return Utilities.imageCache.imageWithIdentifier(fileName, fromDisk: false)
         }
         set {
             let fileName = Constants.General.FullPhotoInitial + id + NSURL(string:url)!.lastPathComponent! + Constants.General.PhotoExtension
-            Utilities.imageCache.storeImage(newValue, withIdentifier: fileName)
+            Utilities.imageCache.storeImage(newValue, withIdentifier: fileName, toDisk: false)
         }
     }
     override func prepareForDeletion() {

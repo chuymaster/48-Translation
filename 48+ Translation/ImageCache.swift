@@ -13,12 +13,12 @@ class ImageCache {
     private var inMemoryCache = NSCache()
     
     init(){
-        inMemoryCache.totalCostLimit = 20*1024*1024 // 20MB
+        inMemoryCache.totalCostLimit = 30*1024*1024 // 30MB
     }
     
     // MARK: - Retreiving images
     
-    func imageWithIdentifier(identifier: String?) -> UIImage? {
+    func imageWithIdentifier(identifier: String?, fromDisk: Bool) -> UIImage? {
         
         // If the identifier is nil, or empty, return nil
         if identifier == nil || identifier! == "" {
@@ -32,10 +32,12 @@ class ImageCache {
             return image
         }
         
-        // Next Try the hard drive
-        if let data = NSData(contentsOfFile: path) {
-            NSLog("Loaded " + path)
-            return UIImage(data: data)
+        // Next Try the hard drive if fromDisk is true
+        if fromDisk{
+            if let data = NSData(contentsOfFile: path) {
+                NSLog("Loaded " + path)
+                return UIImage(data: data)
+            }
         }
         
         return nil
@@ -43,7 +45,7 @@ class ImageCache {
     
     // MARK: - Saving images
     
-    func storeImage(image: UIImage?, withIdentifier identifier: String) {
+    func storeImage(image: UIImage?, withIdentifier identifier: String, toDisk: Bool) {
         let path = pathForIdentifier(identifier)
         
         // If the image is nil, remove images from the cache
@@ -60,10 +62,12 @@ class ImageCache {
         // Otherwise, keep the image in memory
         inMemoryCache.setObject(image!, forKey: path)
         
-        // And in documents directory
-        let data = UIImageJPEGRepresentation(image!, 0.8)!
-        data.writeToFile(path, atomically: true)
-        NSLog("Saved " + path)
+        // And in documents directory if toDisk is true
+        if toDisk{
+            let data = UIImageJPEGRepresentation(image!, 0.8)!
+            data.writeToFile(path, atomically: true)
+            NSLog("Saved " + path)
+        }
     }
     
     // MARK: - Helper
