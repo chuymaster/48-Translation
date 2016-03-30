@@ -60,8 +60,13 @@ class TranslateVC: PostBaseVC, UITextViewDelegate, UIGestureRecognizerDelegate {
     }
     
     @IBAction func shareItem(sender: AnyObject) {
-        let items = [translatedTextView.text, postImageView.image!, NSURL(string: post.url)!]
-        Utilities.shareItems(self, items: items)
+        if let image = postImageView.image{
+            let items = [translatedTextView.text, image, NSURL(string: post.url)!]
+            Utilities.shareItems(self, items: items)
+        }else{
+            let items = [translatedTextView.text, NSURL(string: post.url)!]
+            Utilities.shareItems(self, items: items)
+        }
     }
     
 }

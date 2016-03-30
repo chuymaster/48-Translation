@@ -15,6 +15,7 @@ class PostTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
     var member: Member!
     var api: GooglePlusAPIClient!
     var posts: [Post]!
+    var loadingFlag: Bool = false
     @IBOutlet weak var likeButton: UIBarButtonItem!
     
     // NSFetchedResultsController for Post entity
@@ -52,8 +53,12 @@ class PostTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
             _checkExisting = false
         }
         api.getPost(member, checkExisting: _checkExisting) { (result, errorString) in
-            dispatch_async(dispatch_get_main_queue()){
-                self.hideLoading()
+            // Wait until loading alert completed showing
+            while self.loadingFlag == false{
+                continue
+            }
+            self.dismissViewControllerAnimated(false){
+                self.loadingFlag = false
                 if result == false{
                     Utilities.displayAlert(self, message: errorString!)
                 }
@@ -75,11 +80,9 @@ class PostTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
         loadingIndicator.startAnimating();
         
         alert.view.addSubview(loadingIndicator)
-        presentViewController(alert, animated: true, completion: nil)
-    }
-    
-    func hideLoading(){
-        dismissViewControllerAnimated(false, completion: nil)
+        presentViewController(alert, animated: true){
+            self.loadingFlag = true
+        }
     }
     
     func fetchPosts(){

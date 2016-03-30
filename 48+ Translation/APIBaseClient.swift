@@ -47,7 +47,7 @@ class APIBaseClient : NSObject{
             }
             
             guard let statusCode = (response as? NSHTTPURLResponse)?.statusCode where statusCode >= 200 && statusCode <= 299 else{
-                let errorString = Message.Error.ER002.message + " \((response as? NSHTTPURLResponse)!.statusCode)"
+                let errorString = Message.Error.ER002.message + " (\((response as? NSHTTPURLResponse)!.statusCode))"
                 self.sendErrorWithCompletionHandler(domain, code: Message.Error.ER002.code, request: request, errorString: errorString, completionHandler: completionHandler)
                 return
             }

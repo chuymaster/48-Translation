@@ -180,7 +180,6 @@ class GooglePlusAPIClient : NSObject{
             if let er = error {
                 NSLog("\(er)")
                 completeWithError(er.localizedDescription)
-                return
             }else{
                 // Get post items
                 guard let items = result[Constants.GooglePlusApi.ActivitiesAPI.ResponseKeys.Items] as? [[String: AnyObject]] else{
