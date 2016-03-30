@@ -105,6 +105,7 @@ class PostVC: PostBaseVC, NSFetchedResultsControllerDelegate {
         downButton.enabled = true
         let previousIndex = posts.indexOf(post)! - 1
         if previousIndex >= 0{
+            photoIndex = 0
             post = posts[previousIndex]
             self.viewWillAppear(true)
         }
@@ -117,6 +118,7 @@ class PostVC: PostBaseVC, NSFetchedResultsControllerDelegate {
         downButton.enabled = true
         let nextIndex = posts.indexOf(post)! + 1
         if nextIndex < posts.count{
+            photoIndex = 0
             post = posts[nextIndex]
             self.viewWillAppear(true)
         }

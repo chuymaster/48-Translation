@@ -50,11 +50,11 @@ class Photo: NSManagedObject{
     var fullImage: UIImage? {
         get {
             let fileName = Constants.General.FullPhotoInitial + id + NSURL(string:url)!.lastPathComponent! + Constants.General.PhotoExtension
-            return Utilities.imageCache.imageWithIdentifier(fileName, fromDisk: false)
+            return Utilities.imageCache.imageWithIdentifier(fileName, fromDisk: true)
         }
         set {
             let fileName = Constants.General.FullPhotoInitial + id + NSURL(string:url)!.lastPathComponent! + Constants.General.PhotoExtension
-            Utilities.imageCache.storeImage(newValue, withIdentifier: fileName, toDisk: false)
+            Utilities.imageCache.storeImage(newValue, withIdentifier: fileName, toDisk: true)
         }
     }
     override func prepareForDeletion() {
