@@ -15,6 +15,8 @@ class PostVC: PostBaseVC, NSFetchedResultsControllerDelegate {
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     @IBOutlet weak var upButton: UIBarButtonItem!
     @IBOutlet weak var downButton: UIBarButtonItem!
+    var photoIndex = 0
+    var maxPhotoIndex = 0
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
@@ -22,9 +24,27 @@ class PostVC: PostBaseVC, NSFetchedResultsControllerDelegate {
         // Load image
         if !post.photos.isEmpty{
             postImageView.hidden = false
-            let photo = post.photos[0]
+            maxPhotoIndex = post.photos.count - 1
+            
+            // If there are many photos, allow user to swipe to go to previous/next photo
+            if maxPhotoIndex > 0 {
+                // Add Swipe
+                let swipeRight = UISwipeGestureRecognizer(target: self, action: #selector(PostVC.swiped(_:))) // put : at the end of method name
+                swipeRight.direction = UISwipeGestureRecognizerDirection.Right
+                postImageView.addGestureRecognizer(swipeRight)
+                
+                let swipeLeft = UISwipeGestureRecognizer(target: self, action: #selector(PostVC.swiped(_:))) // put : at the end of method name
+                swipeLeft.direction = UISwipeGestureRecognizerDirection.Left
+                postImageView.addGestureRecognizer(swipeLeft)
+            }
+            
+            let photo = post.photos[photoIndex]
+            
             if photo.fullImage != nil{
                 postImageView.image = photo.fullImage
+                // Add gesture recognizer immediately
+                self.postImageView.addGestureRecognizer(self.longPressRecognizer)
+                self.postImageView.addGestureRecognizer(self.tabRecognizer)
             }else{
                 postImageView.alpha = 0
                 activityIndicator.startAnimating()
@@ -96,5 +116,43 @@ class PostVC: PostBaseVC, NSFetchedResultsControllerDelegate {
             downButton.enabled = false
         }
     }
+    
+    // MARK: Swipe to change photo
+    // http://stackoverflow.com/questions/28696008/swipe-back-and-forth-through-array-of-images-swift
+    func swiped(gesture: UIGestureRecognizer) {
+        
+        if let swipeGesture = gesture as? UISwipeGestureRecognizer {
+            switch swipeGesture.direction {
+            case UISwipeGestureRecognizerDirection.Right :
+                print("User swiped right")
+                
+                // decrease index first
+                photoIndex -= 1
+                
+                // check if index is in range
+                if photoIndex < 0 {
+                    photoIndex = maxPhotoIndex
+                }
+                
+                // Reload the view
+                viewWillAppear(true)
+                
+            case UISwipeGestureRecognizerDirection.Left:
+                print("User swiped Left")
+                // increase index first
+                photoIndex += 1
+                
+                // check if index is in range
+                if photoIndex > maxPhotoIndex {
+                    photoIndex = 0
+                }
+                
+                // Reload the view
+                viewWillAppear(true)
+                
+            default:
+                break
+            }
+        }
+    }
 }
-
