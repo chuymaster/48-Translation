@@ -1,6 +1,6 @@
 //
 //  Constants.swift
-//  48+ Translation Mockup
+//  48+ Translation
 //
 //  Created by CHATCHAI LOKNIYOM on 3/23/16.
 //  Copyright © 2016 CHATCHAI LOKNIYOM. All rights reserved.

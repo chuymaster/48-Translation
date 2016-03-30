@@ -326,7 +326,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 051B75341CA4CD040070518A /* Build configuration list for PBXProject "Trans48+" */;
+			buildConfigurationList = 051B75341CA4CD040070518A /* Build configuration list for PBXProject "48+ Translation" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -537,7 +537,7 @@
 				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				INFOPLIST_FILE = "48+ Translation/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "chatchai.-8--Translation";
+				PRODUCT_BUNDLE_IDENTIFIER = chatchai.Trans48;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 			};
@@ -552,7 +552,7 @@
 				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				INFOPLIST_FILE = "48+ Translation/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "chatchai.-8--Translation";
+				PRODUCT_BUNDLE_IDENTIFIER = chatchai.Trans48;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 			};
@@ -607,7 +607,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		051B75341CA4CD040070518A /* Build configuration list for PBXProject "Trans48+" */ = {
+		051B75341CA4CD040070518A /* Build configuration list for PBXProject "48+ Translation" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				051B755F1CA4CD060070518A /* Debug */,
