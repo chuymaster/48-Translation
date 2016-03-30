@@ -23,6 +23,7 @@ struct Message{
         static let ER006 = (code:-6, message:"There is an error in response content.")
         static let ER007 = (code:-7, message:"Failed to fetch members.")
         static let ER008 = (code:-8, message:"Failed to fetch posts.")
+        static let ER009 = (code:-9, message:"Could not download the photo")
         
     }
     struct Warning{

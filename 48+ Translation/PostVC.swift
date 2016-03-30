@@ -62,6 +62,14 @@ class PostVC: PostBaseVC, NSFetchedResultsControllerDelegate {
                             self.postImageView.addGestureRecognizer(self.longPressRecognizer)
                             self.postImageView.addGestureRecognizer(self.tabRecognizer)
                         }
+                    }else{
+                        dispatch_async(dispatch_get_main_queue()){
+                            self.activityIndicator.stopAnimating()
+                            UIView.animateWithDuration(0.3) {
+                                self.postImageView.alpha = 1
+                            }
+                            Utilities.displayAlert(self, message: Message.Error.ER009.message)
+                        }
                     }
                 }
             }

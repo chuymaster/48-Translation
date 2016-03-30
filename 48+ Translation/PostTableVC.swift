@@ -155,7 +155,14 @@ class PostTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
                             UIView.animateWithDuration(0.3) {
                                 cell.postImage.alpha = 1
                             }
-                            
+                        }
+                    }else{
+                        dispatch_async(dispatch_get_main_queue()){
+                            // In case image can't be loaded due to the internet, etc, show gray image
+                            cell.activityIndicator.stopAnimating()
+                            UIView.animateWithDuration(0.3) {
+                                cell.postImage.alpha = 1
+                            }
                         }
                     }
                 }
