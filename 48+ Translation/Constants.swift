@@ -29,6 +29,7 @@ struct Constants{
         static let PhotoExtension = ".jpg"
         static let ThumbnailInitial = "T"
         static let FullPhotoInitial = "F"
+        static let PhotoAnimationDuration = 5.0
     }
     
     // MARK: Image name

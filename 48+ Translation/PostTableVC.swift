@@ -132,24 +132,29 @@ class PostTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
         cell.accessoryType = .DisclosureIndicator
         cell.titleLabel.text = post.title
         cell.descriptionLabel.text = post.publishedAtString
+        cell.postImage.animationRepeatCount = 0
         
         // Deal with photo download
         let photos = post.photos
         if !photos.isEmpty{
             if photos.count > 1{
+                cell.postImage.alpha = 0
                 var imageArray = [UIImage]()
-                let animationDuration = 3.0
+                let animationDuration = Constants.General.PhotoAnimationDuration
                 for photo in photos{
                     let thumbUrl = photo.thumbUrl
                     // Check caches
                     if let image = photo.thumbImage{
+                        cell.postImage.alpha = 1
                         imageArray.append(image)
                         cell.activityIndicator.stopAnimating()
                         cell.postImage.animationImages = imageArray
                         cell.postImage.animationDuration = animationDuration * Double(imageArray.count)
-                        cell.postImage.animationRepeatCount = 0
                         cell.postImage.startAnimating()
                     }else{
+                        UIView.animateWithDuration(0.3) {
+                            cell.postImage.alpha = 1
+                        }
                         // Load each image in background
                         let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
                         dispatch_sync(dispatch_get_global_queue(priority, 0)){
@@ -161,7 +166,6 @@ class PostTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
                                         cell.activityIndicator.stopAnimating()
                                         cell.postImage.animationImages = imageArray
                                         cell.postImage.animationDuration = animationDuration * Double(imageArray.count)
-                                        cell.postImage.animationRepeatCount = 0
                                         cell.postImage.startAnimating()
                                         }
                                     }
