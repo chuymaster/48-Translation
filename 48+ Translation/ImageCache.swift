@@ -35,7 +35,7 @@ class ImageCache {
         // Next Try the hard drive if fromDisk is true
         if fromDisk{
             if let data = NSData(contentsOfFile: path) {
-                NSLog("Loaded " + path)
+                //NSLog("Loaded " + path)
                 return UIImage(data: data)
             }
         }
@@ -66,7 +66,7 @@ class ImageCache {
         if toDisk{
             let data = UIImageJPEGRepresentation(image!, 0.8)!
             data.writeToFile(path, atomically: true)
-            NSLog("Saved " + path)
+            //NSLog("Saved " + path)
         }
     }
     

@@ -136,37 +136,82 @@ class PostTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
         // Deal with photo download
         let photos = post.photos
         if !photos.isEmpty{
-            
-            // Use only the first photo
-            let photo = photos[0]
-            // Check caches
-            if photo.thumbImage != nil{
-                cell.postImage.image = photo.thumbImage
-            }else{
-                cell.postImage.alpha = 0
-                cell.activityIndicator.startAnimating()
-                let task = APIBaseClient.sharedInstance.taskForImage(photo.thumbUrl){ (imageData, error) in
-                    if let data = imageData{
-                        dispatch_async(dispatch_get_main_queue()){
-                            let image = UIImage(data: data)
-                            photo.thumbImage = image
-                            cell.postImage.image = image
-                            cell.activityIndicator.stopAnimating()
-                            UIView.animateWithDuration(0.3) {
-                                cell.postImage.alpha = 1
-                            }
-                        }
+            if photos.count > 1{
+                var imageArray = [UIImage]()
+                let animationDuration = 5.0
+                for photo in photos{
+                    if let image = photo.thumbImage{
+                        cell.activityIndicator.stopAnimating()
+                        imageArray.append(image)
+                        cell.postImage.animationImages = imageArray
+                        cell.postImage.animationDuration = animationDuration * Double(imageArray.count)
+                        cell.postImage.animationRepeatCount = 0
+                        cell.postImage.startAnimating()
                     }else{
-                        dispatch_async(dispatch_get_main_queue()){
-                            // In case image can't be loaded due to the internet, etc, show gray image
-                            cell.activityIndicator.stopAnimating()
-                            UIView.animateWithDuration(0.3) {
-                                cell.postImage.alpha = 1
+                        let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
+                        dispatch_sync(dispatch_get_global_queue(priority, 0)){
+                            var _completed = false
+                            let task = APIBaseClient.sharedInstance.taskForImage(photo.thumbUrl){ (imageData, error) in
+                                _completed = true
+                                if let image = UIImage(data: imageData!){
+                                    imageArray.append(image)
+                                    dispatch_async(dispatch_get_main_queue()){
+                                        cell.activityIndicator.stopAnimating()
+                                        photo.thumbImage = image
+                                        cell.postImage.animationImages = imageArray
+                                        cell.postImage.animationDuration = animationDuration * Double(imageArray.count)
+                                        cell.postImage.animationRepeatCount = 0
+                                        cell.postImage.startAnimating()
+                                        }
+                                    }
+                                }
+                            cell.taskToCancelifCellIsReused = task
+                            while !_completed {
+                                continue
+                            }
+                            if imageArray.isEmpty{
+                                dispatch_async(dispatch_get_main_queue()){
+                                    // In case image can't be loaded at all, show gray image
+                                    cell.activityIndicator.stopAnimating()
+                                    UIView.animateWithDuration(0.3) {
+                                        cell.postImage.alpha = 1
+                                    }
+                                }
                             }
                         }
                     }
                 }
-                cell.taskToCancelifCellIsReused = task
+            }else{
+                let photo = photos[0]
+                // Check caches
+                if photo.thumbImage != nil{
+                    cell.postImage.image = photo.thumbImage
+                }else{
+                    cell.postImage.alpha = 0
+                    cell.activityIndicator.startAnimating()
+                    let task = APIBaseClient.sharedInstance.taskForImage(photo.thumbUrl){ (imageData, error) in
+                        if let data = imageData{
+                            dispatch_async(dispatch_get_main_queue()){
+                                let image = UIImage(data: data)
+                                photo.thumbImage = image
+                                cell.postImage.image = image
+                                cell.activityIndicator.stopAnimating()
+                                UIView.animateWithDuration(0.3) {
+                                    cell.postImage.alpha = 1
+                                }
+                            }
+                        }else{
+                            dispatch_async(dispatch_get_main_queue()){
+                                // In case image can't be loaded due to the internet, etc, show gray image
+                                cell.activityIndicator.stopAnimating()
+                                UIView.animateWithDuration(0.3) {
+                                    cell.postImage.alpha = 1
+                                }
+                            }
+                        }
+                    }
+                    cell.taskToCancelifCellIsReused = task
+                }
             }
         }
     }
