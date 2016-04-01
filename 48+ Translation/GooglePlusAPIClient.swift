@@ -186,7 +186,13 @@ class GooglePlusAPIClient : NSObject{
                     completeWithError(Message.Error.ER006.message)
                     return
                 }
-                
+                // Get all post items id into list
+                var itemIdList: [String] = []
+                for item in items{
+                    if let id = item[Constants.GooglePlusApi.ActivitiesAPI.ResponseKeys.Id] as? String{
+                        itemIdList.append(id)
+                    }
+                }
                 for item in items{
                     // Check if post already loaded
                     var _newFlag = true
@@ -195,6 +201,10 @@ class GooglePlusAPIClient : NSObject{
                             dispatch_sync(dispatch_get_main_queue()){
                                 if post.id == id{
                                     _newFlag = false
+                                }
+                                if !itemIdList.contains(post.id){
+                                    // Delete old posts
+                                    Utilities.sharedContext.deleteObject(post)
                                 }
                             }
                         }
