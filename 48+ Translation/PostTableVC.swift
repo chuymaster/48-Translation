@@ -138,26 +138,27 @@ class PostTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
         if !photos.isEmpty{
             if photos.count > 1{
                 var imageArray = [UIImage]()
-                let animationDuration = 5.0
+                let animationDuration = 3.0
                 for photo in photos{
+                    let thumbUrl = photo.thumbUrl
+                    // Check caches
                     if let image = photo.thumbImage{
-                        cell.activityIndicator.stopAnimating()
                         imageArray.append(image)
+                        cell.activityIndicator.stopAnimating()
                         cell.postImage.animationImages = imageArray
                         cell.postImage.animationDuration = animationDuration * Double(imageArray.count)
                         cell.postImage.animationRepeatCount = 0
                         cell.postImage.startAnimating()
                     }else{
+                        // Load each image in background
                         let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
                         dispatch_sync(dispatch_get_global_queue(priority, 0)){
-                            var _completed = false
-                            let task = APIBaseClient.sharedInstance.taskForImage(photo.thumbUrl){ (imageData, error) in
-                                _completed = true
-                                if let image = UIImage(data: imageData!){
+                            let task = APIBaseClient.sharedInstance.taskForImage(thumbUrl){ (imageData, error) in
+                                if let data = imageData, image = UIImage(data: data){
                                     imageArray.append(image)
                                     dispatch_async(dispatch_get_main_queue()){
-                                        cell.activityIndicator.stopAnimating()
                                         photo.thumbImage = image
+                                        cell.activityIndicator.stopAnimating()
                                         cell.postImage.animationImages = imageArray
                                         cell.postImage.animationDuration = animationDuration * Double(imageArray.count)
                                         cell.postImage.animationRepeatCount = 0
@@ -166,16 +167,10 @@ class PostTableVC: UITableViewController, NSFetchedResultsControllerDelegate {
                                     }
                                 }
                             cell.taskToCancelifCellIsReused = task
-                            while !_completed {
-                                continue
-                            }
+                            // In case image can't be loaded at all
                             if imageArray.isEmpty{
                                 dispatch_async(dispatch_get_main_queue()){
-                                    // In case image can't be loaded at all, show gray image
                                     cell.activityIndicator.stopAnimating()
-                                    UIView.animateWithDuration(0.3) {
-                                        cell.postImage.alpha = 1
-                                    }
                                 }
                             }
                         }

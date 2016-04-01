@@ -40,13 +40,20 @@ class PostVC: PostBaseVC, NSFetchedResultsControllerDelegate {
             
             let photo = post.photos[photoIndex]
             
+            // Set thumbnail image before start loading full image
+            if photo.thumbImage != nil{
+                postImageView.image = photo.thumbImage
+            }
+            
             if photo.fullImage != nil{
                 postImageView.image = photo.fullImage
                 // Add gesture recognizer immediately
                 self.postImageView.addGestureRecognizer(self.longPressRecognizer)
                 self.postImageView.addGestureRecognizer(self.tabRecognizer)
             }else{
-                postImageView.alpha = 0
+                if photo.thumbImage == nil{
+                    postImageView.alpha = 0
+                }
                 activityIndicator.startAnimating()
                 APIBaseClient.sharedInstance.taskForImage(photo.fullUrl){ (imageData, error) in
                     if let data = imageData{
