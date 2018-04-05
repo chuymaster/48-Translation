@@ -7,6 +7,10 @@ Final Project of Udacity iOS Nanodegree course
 Trans48+ is an iOS Swift application that let you browse AKB48 group, Japanese girl idol group, members' Google+ posts, translate the content and share the translation via iOS's integrated share activity.
 In the 1st version, Trans48+ enables browsing Google+ posts of HKT48, part of AKB48 group, members. Other group members will be added in the future version.
 
+# App Store Version
+
+You can find the latest version on the app store here https://itunes.apple.com/app/id1107350866 (No source code uploaded)
+
 ## Intended user experience
 
 ### Translation
